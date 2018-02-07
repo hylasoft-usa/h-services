@@ -4,7 +4,7 @@ using Hylasoft.Services.Types;
 
 namespace Hylasoft.Services.Interfaces
 {
-  public interface IHService
+  public interface IHService : IServiceStatusElement
   {
     Result Initialize();
 
@@ -15,16 +15,6 @@ namespace Hylasoft.Services.Interfaces
     Result Pause();
 
     Result Restart();
-
-    ServiceStatuses Status { get; }
-
-    bool IsRunning { get; }
-
-    bool IsStopped { get; }
-
-    bool IsFailed { get; }
-
-    bool IsPaused { get; }
 
     event EventHandler<ServiceStatusTransition> StatusChanged;
 

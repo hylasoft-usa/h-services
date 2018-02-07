@@ -4,18 +4,16 @@ using Hylasoft.Resolution;
 using Hylasoft.Services.Configuration;
 using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Resources;
+using Hylasoft.Services.Service;
 using Hylasoft.Services.Types;
 
 namespace Hylasoft.Services.Monitoring
 {
-  public abstract class HMonitor : IMonitor
+  public abstract class HMonitor : HServiceStatusBase, IMonitor
   {
     private ServiceStatuses _status;
     private readonly object _statusLock;
     private readonly IMonitoringConfig _config;
-    private readonly Result _userRequestedTransition;
-
-    protected Result UserRequestedTransition { get { return _userRequestedTransition; } }
 
     protected IMonitoringConfig Config { get { return _config; } }
 
@@ -28,7 +26,6 @@ namespace Hylasoft.Services.Monitoring
       _config = config;
       _statusLock = new object();
       _config = config ?? new DefaultMonitoringConfig();
-      _userRequestedTransition = Result.SingleDebug(Debugs.UserRequestedTransition);
 
       // TODO: Consider an unknown reason.
       LastTransitionReason = UserRequestedTransition;
@@ -106,68 +103,9 @@ namespace Hylasoft.Services.Monitoring
       return Result.ConcatRestricted(Stop, Start);
     }
 
-    public ServiceStatuses Status
+    public override ServiceStatuses Status
     {
       get { return GetStatus(); }
-    }
-
-    public bool IsRunning
-    {
-      get
-      {
-        switch (Status)
-        {
-          case ServiceStatuses.Started:
-            return true;
-        }
-
-        return false;
-      }
-    }
-
-    public bool IsStopped
-    {
-      get
-      {
-        switch (Status)
-        {
-          case ServiceStatuses.Stopping:
-          case ServiceStatuses.Stopped:
-          case ServiceStatuses.Paused:
-          case ServiceStatuses.Failed:
-            return true;
-        }
-
-        return false;
-      }
-    }
-
-    public bool IsFailed
-    {
-      get
-      {
-        switch (Status)
-        {
-          case ServiceStatuses.Failed:
-            return true;
-        }
-
-        return false;
-      }
-    }
-
-    public bool IsPaused
-    {
-      get
-      {
-        switch (Status)
-        {
-          case ServiceStatuses.Paused:
-            return true;
-        }
-
-        return false;
-      }
     }
 
     public event EventHandler<ServiceStatusTransition> StatusChanged;

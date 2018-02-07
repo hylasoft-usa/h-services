@@ -53,6 +53,7 @@
     <Compile Include="Interfaces\IMonitoringConfig.cs" />
     <Compile Include="Interfaces\IHService.cs" />
     <Compile Include="Interfaces\IHServicesProvider.cs" />
+    <Compile Include="Interfaces\IServiceStatusElement.cs" />
     <Compile Include="Interfaces\IServiceValidator.cs" />
     <Compile Include="Interfaces\ISetMonitor.cs" />
     <Compile Include="Monitoring\SetMonitor.cs" />
@@ -82,6 +83,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Monitoring\HMonitor.cs" />
+    <Compile Include="Service\HServiceStatusBase.cs" />
     <Compile Include="Types\ServiceStatuses.cs" />
     <Compile Include="Types\ServiceStatusTransition.cs" />
     <Compile Include="Utilities\ItemSetComparer.cs" />

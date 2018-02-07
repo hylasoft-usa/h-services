@@ -3,21 +3,21 @@ using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Types;
+using Hylasoft.Services.Validation;
 
 namespace Hylasoft.Services.Service
 {
-  public abstract class HService : IHService
+  public abstract class HService : HServiceStatusBase, IHService
   {
     private bool _initialized;
     private ServiceStatuses _status;
     private readonly IServiceValidator _serviceValidator;
 
-    protected IServiceValidator ServiceValidator
-    { get { return _serviceValidator; } }
+    protected IServiceValidator ServiceValidator { get { return _serviceValidator; } }
 
-    protected HService(IServiceValidator serviceValidator)
+    protected HService(IServiceValidator serviceValidator = null)
     {
-      _serviceValidator = serviceValidator;
+      _serviceValidator = serviceValidator ?? new ServiceValidator();
       _status = ServiceStatuses.Stopped;
       _initialized = false;
     }
@@ -66,20 +66,8 @@ namespace Hylasoft.Services.Service
     }
 
     protected abstract Result InitalizeService();
-
-    public ServiceStatuses Status { get { return _status; } }
-    public bool IsRunning { get; private set; }
-    public bool IsStopped { get; private set; }
-    public bool IsFailed { get; private set; }
-    public bool IsPaused { get; private set; }
-
-    event EventHandler<ServiceStatusTransition> IHService.StatusChanged
-    {
-      add { throw new NotImplementedException(); }
-      remove { throw new NotImplementedException(); }
-    }
-
-    public event EventHandler<ServiceStatuses> StatusChanged;
+    
+    public event EventHandler<ServiceStatusTransition> StatusChanged;
 
     public event EventHandler<Result> ErrorOccured;
 
@@ -91,8 +79,9 @@ namespace Hylasoft.Services.Service
 
     protected abstract string ServiceName { get; }
 
-    private Result StateChange(ServiceStatuses status, Func<Result> action, string success, string fail)
+    private Result StateChange(ServiceStatuses status, Func<Result> action, string success, string fail, Result reason = null)
     {
+      reason = reason ?? UserRequestedTransition;
       var currentStatus = Status;
       if (currentStatus == status)
         return Result.Success;
@@ -104,10 +93,12 @@ namespace Hylasoft.Services.Service
       try
       {
         change += action();
+        TransitionStatus(status, reason);
       }
       catch (Exception e)
       {
         change += Result.Error(e);
+        TransitionStatus(ServiceStatuses.Failed, change);
       }
 
       return change + ((change)
@@ -115,28 +106,28 @@ namespace Hylasoft.Services.Service
         : Result.SingleError(fail, this));
     }
 
-    protected Result SetRunning()
+    protected Result SetRunning(Result reason)
     {
-      return TransitionStatus(ServiceStatuses.Started);
+      return TransitionStatus(ServiceStatuses.Started, reason);
     }
 
-    protected Result SetStopped()
+    protected Result SetStopped(Result reason)
     {
-      return TransitionStatus(ServiceStatuses.Stopped);
+      return TransitionStatus(ServiceStatuses.Stopped, reason);
     }
 
-    protected Result SetPaused()
+    protected Result SetPaused(Result reason)
     {
-      return TransitionStatus(ServiceStatuses.Paused);
+      return TransitionStatus(ServiceStatuses.Paused, reason);
     }
 
-    private Result TransitionStatus(ServiceStatuses status)
+    private Result TransitionStatus(ServiceStatuses status, Result reason)
     {
       Result transition;
       if (!(transition = CanTransitionTo(status)))
         return transition;
 
-      return transition + SetStatus(status);
+      return transition + SetStatus(status, reason);
     }
 
     private Result CanTransitionTo(ServiceStatuses status)
@@ -149,27 +140,28 @@ namespace Hylasoft.Services.Service
         : Result.SingleError(Warnings.ServiceStatusTransitionNotAllowed, currentStatus, status);
     }
 
-    private Result SetStatus(ServiceStatuses status)
+    private Result SetStatus(ServiceStatuses status, Result reason)
     {
-      if (_status == status)
+      ServiceStatuses oldStatus;
+      if ((oldStatus = _status) == status)
         return Result.Success;
 
       try
       {
         _status = status;
-        TriggerStatusChanged(status);
+        TriggerStatusChanged(oldStatus, status, reason);
         return Result.Success;
       }
       catch (Exception e)
       {
-        return Result.Error(e);
+        return reason + Result.Error(e);
       }
     }
 
-    private void TriggerStatusChanged(ServiceStatuses status)
+    private void TriggerStatusChanged(ServiceStatuses oldStatus, ServiceStatuses newStatus, Result reason)
     {
       if (StatusChanged != null)
-        StatusChanged(this, status);
+        StatusChanged(this, new ServiceStatusTransition(oldStatus, newStatus, reason));
     }
 
     protected void TriggerErrorOccured(Result error)
