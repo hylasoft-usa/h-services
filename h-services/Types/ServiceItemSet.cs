@@ -17,9 +17,11 @@ namespace Hylasoft.Services.Types
 			get { return _items; }
 		}
 
-		public ServiceItemSet(Collection<TServiceItem> items)
+		public ServiceItemSet(IEnumerable<TServiceItem> items)
 		{
-			_items = items;
+		  _items = items == null
+		    ? new Collection<TServiceItem>()
+		    : items.ToCollection();
 		}
 
 		public Collection<TServiceItem> FailedItems

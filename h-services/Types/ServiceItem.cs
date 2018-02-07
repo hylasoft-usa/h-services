@@ -60,10 +60,27 @@ namespace Hylasoft.Services.Types
 				catch (Exception e)
 				{
 					Errors += Result.Error(e);
-					Console.WriteLine("Failed. Exception:" + e);
 					_state = ServiceItemStates.Failed;
 				}
 			};
 		}
+
+	  protected Action PerformActionOnArgs<TArg>(Action<TArg> action, object args)
+      where TArg: class
+	  {
+      var changedSet = args as TArg;
+      return changedSet == null
+        ? (Action)DoNothing
+        : () => action(changedSet); 
+	  }
+    
+	  protected Action PerformNothing()
+	  {
+	    return DoNothing;
+	  }
+
+    protected void DoNothing()
+    {
+    }
 	}
 }

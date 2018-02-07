@@ -61,6 +61,24 @@ namespace Hylasoft.Services.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} is already running..
+        /// </summary>
+        internal static string MonitorIsAlreadyRunning {
+            get {
+                return ResourceManager.GetString("MonitorIsAlreadyRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is already stopped..
+        /// </summary>
+        internal static string MonitorIsAlreadyStopped {
+            get {
+                return ResourceManager.GetString("MonitorIsAlreadyStopped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find find scheduled method &apos;{0}&apos;..
         /// </summary>
         internal static string ScheduleMethodNotFound {
