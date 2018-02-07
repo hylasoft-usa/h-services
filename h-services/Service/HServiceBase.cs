@@ -8,7 +8,7 @@ using Hylasoft.Services.Types;
 
 namespace Hylasoft.Services.Service
 {
-  public abstract class HServiceBase : IService
+  public abstract class HServiceBase : IHService
   {
     private ServiceStatuses _status;
     private readonly object _statusLock;
@@ -32,6 +32,18 @@ namespace Hylasoft.Services.Service
 
       // TODO: Consider an unknown reason.
       LastTransitionReason = UserRequestedTransition;
+    }
+
+    public Result Initialize()
+    {
+      try
+      {
+        return InitializeService();
+      }
+      catch (Exception e)
+      {
+        return Result.Error(e);
+      }
     }
 
     public Result Start()
@@ -84,6 +96,16 @@ namespace Hylasoft.Services.Service
       return CleanupOnShutdown();
     }
 
+    public Result Pause()
+    {
+      return SetStatus(ServiceStatuses.Paused, UserRequestedTransition);
+    }
+
+    public Result Restart()
+    {
+      return Result.ConcatRestricted(Stop, Start);
+    }
+
     public ServiceStatuses Status
     {
       get { return GetStatus(); }
@@ -111,6 +133,7 @@ namespace Hylasoft.Services.Service
         {
           case ServiceStatuses.Stopping:
           case ServiceStatuses.Stopped:
+          case ServiceStatuses.Paused:
           case ServiceStatuses.Failed:
             return true;
         }
@@ -133,11 +156,29 @@ namespace Hylasoft.Services.Service
       }
     }
 
+    public bool IsPaused
+    {
+      get
+      {
+        switch (Status)
+        {
+          case ServiceStatuses.Paused:
+            return true;
+        }
+
+        return false;
+      }
+    }
+
     public event EventHandler<ServiceStatusTransition> StatusChanged;
+    public event EventHandler<Result> ErrorOccured;
+
     #endregion
 
     #region Abstract Members
     protected abstract string ServiceName { get; }
+
+    protected abstract Result InitializeService();
 
     protected abstract Result PerformServiceLoop();
 
@@ -153,11 +194,11 @@ namespace Hylasoft.Services.Service
         return;
 
       SetStatus(ServiceStatuses.Started, LastTransitionReason);
-      while (IsRunning)
+      while (IsRunning || IsPaused)
       {
         Result loop;
         // TODO: Consider a re-try mechanism.
-        if (!(loop = PerformServiceLoop()))
+        if (IsRunning && !(loop = PerformServiceLoop()))
           FailOut(loop);
 
         Thread.Sleep(Config.MonitorSleepInMilliseconds);
@@ -167,7 +208,7 @@ namespace Hylasoft.Services.Service
         SetStatus(ServiceStatuses.Stopped, LastTransitionReason);
     }
 
-    private void SetStatus(ServiceStatuses status, Result reason)
+    private Result SetStatus(ServiceStatuses status, Result reason)
     {
       var hasChanged = false;
       ServiceStatuses oldStatus;
@@ -180,10 +221,13 @@ namespace Hylasoft.Services.Service
         }
       }
 
-      // Drop out gracefully, if nothing has changed.
-      if (!hasChanged) return;
-      LastTransitionReason = reason;
-      TriggerStatusChanged(oldStatus, Status, reason);
+      if (hasChanged)
+      {
+        LastTransitionReason = reason;
+        TriggerStatusChanged(oldStatus, Status, reason);
+      }
+
+      return reason;
     }
 
     private ServiceStatuses GetStatus()

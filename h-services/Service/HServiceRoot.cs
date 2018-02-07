@@ -128,12 +128,12 @@ namespace Hylasoft.Services.Service
       Logger.Log(result);
     }
 
-    protected void HandleStatusChange(object o, ServiceStatuses status)
+    protected void HandleStatusChange(object o, ServiceStatusTransition transition)
     {
       var service = o as HService;
       if (service == null) return;
 
-      Logger.Log(Result.SingleInfo(Messages.ServiceStatusChanged, service, status));
+      Logger.Log(Result.SingleInfo(Messages.ServiceStatusChanged, service, transition.CurrentStatus));
     }
     #endregion
   }

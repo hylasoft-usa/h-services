@@ -52,7 +52,6 @@
     <Compile Include="Interfaces\IMonitor.cs" />
     <Compile Include="Interfaces\IMonitoringConfig.cs" />
     <Compile Include="Interfaces\IHService.cs" />
-    <Compile Include="Interfaces\IService.cs" />
     <Compile Include="Interfaces\IServiceItemSetMonitor.cs" />
     <Compile Include="Interfaces\IServiceMonitor.cs" />
     <Compile Include="Interfaces\IHServicesProvider.cs" />

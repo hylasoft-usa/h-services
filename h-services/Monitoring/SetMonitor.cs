@@ -44,6 +44,12 @@ namespace Hylasoft.Services.Monitoring
     {
       get { return MonitorName; }
     }
+
+    protected override Result InitializeService()
+    {
+      return Result.Success;
+    }
+
     #endregion
 
     #region Abstract Methods

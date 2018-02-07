@@ -18,7 +18,15 @@ namespace Hylasoft.Services.Interfaces
 
     ServiceStatuses Status { get; }
 
-    event EventHandler<ServiceStatuses> StatusChanged;
+    bool IsRunning { get; }
+
+    bool IsStopped { get; }
+
+    bool IsFailed { get; }
+
+    bool IsPaused { get; }
+
+    event EventHandler<ServiceStatusTransition> StatusChanged;
 
     event EventHandler<Result> ErrorOccured;
   }

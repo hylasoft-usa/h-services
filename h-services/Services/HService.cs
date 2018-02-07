@@ -68,6 +68,16 @@ namespace Hylasoft.Services.Services
     protected abstract Result InitalizeService();
 
     public ServiceStatuses Status { get { return _status; } }
+    public bool IsRunning { get; private set; }
+    public bool IsStopped { get; private set; }
+    public bool IsFailed { get; private set; }
+    public bool IsPaused { get; private set; }
+
+    event EventHandler<ServiceStatusTransition> IHService.StatusChanged
+    {
+      add { throw new NotImplementedException(); }
+      remove { throw new NotImplementedException(); }
+    }
 
     public event EventHandler<ServiceStatuses> StatusChanged;
 
