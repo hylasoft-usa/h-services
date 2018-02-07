@@ -1,0 +1,23 @@
+﻿using System;
+using Hylasoft.Resolution;
+using Hylasoft.Services.Types;
+
+namespace Hylasoft.Services.Interfaces
+{
+  public interface IService
+  {
+    Result Start();
+
+    Result Stop();
+
+    ServiceStatuses Status { get; }
+
+    bool IsRunning { get; }
+
+    bool IsStopped { get; }
+
+    bool IsFailed { get; }
+
+    event EventHandler<ServiceStatusTransition> StatusChanged;
+  }
+}

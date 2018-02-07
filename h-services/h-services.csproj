@@ -52,6 +52,7 @@
     <Compile Include="Interfaces\IMonitor.cs" />
     <Compile Include="Interfaces\IMonitoringConfig.cs" />
     <Compile Include="Interfaces\IHService.cs" />
+    <Compile Include="Interfaces\IService.cs" />
     <Compile Include="Interfaces\IServiceItemSetMonitor.cs" />
     <Compile Include="Interfaces\IServiceMonitor.cs" />
     <Compile Include="Interfaces\IHServicesProvider.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="Service\HServiceRoot.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Service\HServiceBase.cs" />
     <Compile Include="Types\ServiceItem.cs" />
     <Compile Include="Types\ServiceItemSet.cs" />
     <Compile Include="Types\ServiceItemStates.cs" />

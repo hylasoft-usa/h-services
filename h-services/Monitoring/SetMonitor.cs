@@ -1,155 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Hylasoft.Resolution;
-using Hylasoft.Services.Configuration;
 using Hylasoft.Services.Interfaces;
-using Hylasoft.Services.Resources;
-using Hylasoft.Services.Types;
+using Hylasoft.Services.Service;
 using Hylasoft.Services.Utilities;
 
 namespace Hylasoft.Services.Monitoring
 {
-  public abstract class SetMonitor<TItem, TItemSpec> : ISetMonitor<TItem>
+  public abstract class SetMonitor<TItem, TItemSpec> : HServiceBase, ISetMonitor<TItem>
     where TItem : class
   {
-    private readonly Result _userRequestedTransition;
     private readonly Dictionary<TItemSpec, TItem> _set;
-    private readonly object _statusLock;
     private readonly ItemSetComparer<TItemSpec> _comparer;
-    private readonly IMonitoringConfig _config;
-    private ServiceStatuses _status;
 
     protected IDictionary<TItemSpec, TItem> Set { get { return _set; } }
 
-    protected Thread RunThread { get; private set; }
-
     protected ItemSetComparer<TItemSpec> Comparer { get { return _comparer; } }
 
-    protected IMonitoringConfig Config { get { return _config; } }
-
-    protected Result UserRequestedTransition { get { return _userRequestedTransition; } }
-
-    protected Result LastTransitionReason { get; private set; }
-
-    #region ISetMonitor Implementation
-    protected SetMonitor(IMonitoringConfig config = null)
+    protected SetMonitor(IMonitoringConfig config = null) : base(config)
     {
-      _statusLock = new object();
       _comparer = new ItemSetComparer<TItemSpec>(AreItemsEqual, GetItemSpecHash);
-      _config = config ?? new DefaultMonitoringConfig();
-
       _set = new Dictionary<TItemSpec, TItem>(Comparer);
-      _userRequestedTransition = Result.SingleDebug(Debugs.UserRequestedTransition);
-
-      // TODO: Consider an unknown reason.
-      LastTransitionReason = UserRequestedTransition;
     }
 
-    public Result Start()
+    #region ServiceBase Implementation
+    protected override Result PerformServiceLoop()
     {
-      if (IsRunning)
-        return Result.SingleWarning(Warnings.MonitorIsAlreadyRunning, MonitorName);
-
-      try
-      {
-        SetStatus(ServiceStatuses.Starting, UserRequestedTransition);
-
-        Result start;
-        if (!(start = UpdateSet()))
-          return FailOut(start);
-
-        RunThread = new Thread(MonitorLoop);
-        RunThread.Start();
-
-        // TODO: Timeout.
-        while(!IsRunning)
-          Thread.Sleep(Config.MonitorSleepInMilliseconds);
-
-        return start;
-      }
-      catch (Exception e)
-      {
-        RunThread.Abort();
-        return FailOut(Result.Error(e));
-      }
+      return UpdateSet();
     }
 
-    public Result Stop()
+    protected override Result InitializeOnStartup()
     {
-      if (IsStopped)
-        return Result.SingleWarning(Warnings.MonitorIsAlreadyStopped, MonitorName);
-
-      SetStatus(ServiceStatuses.Stopping, UserRequestedTransition);
-
-      try
-      {
-        RunThread.Join(Config.AbortTimeoutInSeconds * 1000);
-      }
-      catch (Exception e)
-      {
-        RunThread.Abort();
-        return FailOut(Result.Error(e));
-      }
-      finally
-      {
-        Set.Clear();
-      }
-
-      return Result.Success;
+      return UpdateSet();
     }
 
-    public ServiceStatuses Status
+    protected override Result CleanupOnShutdown()
     {
-      get { return GetStatus(); }
+      return ClearSet();
     }
 
-    public bool IsRunning
+    protected override string ServiceName
     {
-      get
-      {
-        switch (Status)
-        {
-          case ServiceStatuses.Started:
-            return true;
-        }
-
-        return false;
-      }
+      get { return MonitorName; }
     }
-
-    public bool IsStopped
-    {
-      get
-      {
-        switch (Status)
-        {
-          case ServiceStatuses.Stopping:
-          case ServiceStatuses.Stopped:
-          case ServiceStatuses.Failed:
-            return true;
-        }
-
-        return false;
-      }
-    }
-
-    public bool IsFailed
-    {
-      get
-      {
-        switch (Status)
-        {
-          case ServiceStatuses.Failed:
-            return true;
-        }
-
-        return false;
-      }
-    }
-
-    public event EventHandler<ServiceStatusTransition> StatusChanged;
     #endregion
 
     #region Abstract Methods
@@ -161,63 +55,11 @@ namespace Hylasoft.Services.Monitoring
 
     protected abstract TItemSpec GetSpecification(TItem item);
 
-    protected abstract string MonitorName { get; }
-
     protected abstract bool AreItemsEqual(TItemSpec a, TItemSpec b);
 
     protected abstract int GetItemSpecHash(TItemSpec spec);
-    #endregion
 
-    #region Threading
-    protected void MonitorLoop()
-    {
-      if (Status != ServiceStatuses.Starting)
-        return;
-
-      SetStatus(ServiceStatuses.Started, LastTransitionReason);
-      while (IsRunning)
-      {
-        Result update;
-        // TODO: Consider a re-try mechanism.
-        if (!(update = UpdateSet()))
-          FailOut(update);
-
-        Thread.Sleep(Config.MonitorSleepInMilliseconds);
-      }
-
-      if (!IsFailed)
-        SetStatus(ServiceStatuses.Stopped, LastTransitionReason);
-    }
-
-    private void SetStatus(ServiceStatuses status, Result reason)
-    {
-      var hasChanged = false;
-      ServiceStatuses oldStatus;
-      lock (_statusLock)
-      {
-        if ((oldStatus = _status) != status)
-        {
-          _status = status;
-          hasChanged = true;
-        }
-      }
-
-      // Drop out gracefully, if nothing has changed.
-      if (!hasChanged) return;
-      LastTransitionReason = reason;
-      TriggerStatusChanged(oldStatus, Status, reason);
-    }
-
-    private ServiceStatuses GetStatus()
-    {
-      ServiceStatuses status;
-      lock (_statusLock)
-      {
-        status = _status;
-      }
-
-      return status;
-    }
+    protected abstract string MonitorName { get; }
     #endregion
 
     #region Helper Methods
@@ -233,6 +75,12 @@ namespace Hylasoft.Services.Monitoring
         return update;
 
       return update + ClearMissingItems(currentSet);
+    }
+
+    protected Result ClearSet()
+    {
+      Set.Clear();
+      return Result.Success;
     }
 
     protected Result UpdateItem(TItem item)
@@ -301,26 +149,10 @@ namespace Hylasoft.Services.Monitoring
       }
     }
 
-    private void TriggerStatusChanged(ServiceStatuses oldStatus, ServiceStatuses newStatus, Result reason)
-    {
-      if (StatusChanged != null)
-        StatusChanged(this, new ServiceStatusTransition(oldStatus, newStatus, reason));
-    }
-
     private void TriggerItemChanged(TItem item)
     {
       if (ItemChanged != null)
         ItemChanged(this, item);
-    }
-
-    protected Result FailOut(Result reason)
-    {
-      var newStatus = reason
-        ? ServiceStatuses.Stopped
-        : ServiceStatuses.Failed;
-
-      SetStatus(newStatus, reason);
-      return reason;
     }
     #endregion
   }
