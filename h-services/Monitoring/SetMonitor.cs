@@ -14,6 +14,7 @@ namespace Hylasoft.Services.Monitoring
   public abstract class SetMonitor<TItem, TItemSpec> : ISetMonitor<TItem>
     where TItem : class
   {
+    private readonly Result _userRequestedTransition;
     private readonly Dictionary<TItemSpec, TItem> _set;
     private readonly object _statusLock;
     private readonly Thread _runThread;
@@ -29,6 +30,10 @@ namespace Hylasoft.Services.Monitoring
 
     protected IMonitoringConfig Config { get { return _config; } }
 
+    protected Result UserRequestedTransition { get { return _userRequestedTransition; } }
+
+    protected Result LastTransitionReason { get; private set; }
+
     #region ISetMonitor Implementation
     protected SetMonitor(IMonitoringConfig config = null)
     {
@@ -38,6 +43,10 @@ namespace Hylasoft.Services.Monitoring
       _config = config ?? new DefaultMonitoringConfig();
 
       _set = new Dictionary<TItemSpec, TItem>(Comparer);
+      _userRequestedTransition = Result.SingleDebug(Debugs.UserRequestedTransition);
+
+      // TODO: Consider an unknown reason.
+      LastTransitionReason = UserRequestedTransition;
     }
 
     public Result Start()
@@ -49,7 +58,7 @@ namespace Hylasoft.Services.Monitoring
       if (!(start = UpdateSet()))
         return FailOut(start);
 
-      SetStatus(ServiceStatuses.Starting);
+      SetStatus(ServiceStatuses.Starting, UserRequestedTransition);
       RunThread.Start();
       return start;
     }
@@ -59,7 +68,7 @@ namespace Hylasoft.Services.Monitoring
       if (IsStopped)
         return Result.SingleWarning(Warnings.MonitorIsAlreadyStopped, MonitorName);
 
-      SetStatus(ServiceStatuses.Stopping);
+      SetStatus(ServiceStatuses.Stopping, UserRequestedTransition);
 
       try
       {
@@ -86,7 +95,7 @@ namespace Hylasoft.Services.Monitoring
     
     public bool IsStopped { get { return Status != ServiceStatuses.Stopped; } }
 
-    public event EventHandler<ServiceStatuses> StatusChanged;
+    public event EventHandler<ServiceStatusTransition> StatusChanged;
     #endregion
 
     #region Abstract Methods
@@ -111,30 +120,33 @@ namespace Hylasoft.Services.Monitoring
       if (Status != ServiceStatuses.Starting)
         return;
 
-      SetStatus(ServiceStatuses.Started);
+      SetStatus(ServiceStatuses.Started, LastTransitionReason);
       while (IsRunning)
       {
         UpdateSet();
         Thread.Sleep(Config.MonitorSleepInMilliseconds);
       }
 
-      SetStatus(ServiceStatuses.Stopped);
+      SetStatus(ServiceStatuses.Stopped, LastTransitionReason);
     }
 
-    private void SetStatus(ServiceStatuses status)
+    private void SetStatus(ServiceStatuses status, Result reason)
     {
       var hasChanged = false;
+      ServiceStatuses oldStatus;
       lock (_statusLock)
       {
-        if (_status != status)
+        if ((oldStatus = _status) != status)
         {
           _status = status;
           hasChanged = true;
         }
       }
 
-      if (hasChanged)
-        TriggerStatusChanged(Status);
+      // Drop out gracefully, if nothing has changed.
+      if (!hasChanged) return;
+      LastTransitionReason = reason;
+      TriggerStatusChanged(oldStatus, Status, reason);
     }
 
     private ServiceStatuses GetStatus()
@@ -230,10 +242,10 @@ namespace Hylasoft.Services.Monitoring
       }
     }
 
-    private void TriggerStatusChanged(ServiceStatuses status)
+    private void TriggerStatusChanged(ServiceStatuses oldStatus, ServiceStatuses newStatus, Result reason)
     {
       if (StatusChanged != null)
-        StatusChanged(this, status);
+        StatusChanged(this, new ServiceStatusTransition(oldStatus, newStatus, reason));
     }
 
     private void TriggerItemChanged(TItem item)
@@ -244,7 +256,11 @@ namespace Hylasoft.Services.Monitoring
 
     protected Result FailOut(Result reason)
     {
-      SetStatus(reason ? ServiceStatuses.Stopped : ServiceStatuses.Failed);
+      var newStatus = reason
+        ? ServiceStatuses.Stopped
+        : ServiceStatuses.Failed;
+
+      SetStatus(newStatus, reason);
       return reason;
     }
     #endregion

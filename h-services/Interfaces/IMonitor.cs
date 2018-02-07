@@ -16,6 +16,6 @@ namespace Hylasoft.Services.Interfaces
 
     bool IsStopped { get; }
 
-    event EventHandler<ServiceStatuses> StatusChanged;
+    event EventHandler<ServiceStatusTransition> StatusChanged;
   }
 }
