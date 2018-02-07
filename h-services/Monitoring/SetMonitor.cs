@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces;
-using Hylasoft.Services.Service;
 using Hylasoft.Services.Utilities;
 
 namespace Hylasoft.Services.Monitoring
 {
-  public abstract class SetMonitor<TItem, TItemSpec> : HServiceBase, ISetMonitor<TItem>
+  public abstract class SetMonitor<TItem, TItemSpec> : HMonitor, ISetMonitor<TItem>
     where TItem : class
   {
     private readonly Dictionary<TItemSpec, TItem> _set;

@@ -6,9 +6,9 @@ using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Types;
 
-namespace Hylasoft.Services.Service
+namespace Hylasoft.Services.Monitoring
 {
-  public abstract class HServiceBase : IHService
+  public abstract class HMonitor : IMonitor
   {
     private ServiceStatuses _status;
     private readonly object _statusLock;
@@ -23,7 +23,7 @@ namespace Hylasoft.Services.Service
 
     protected Thread RunThread { get; private set; }
 
-    protected HServiceBase(IMonitoringConfig config = null)
+    protected HMonitor(IMonitoringConfig config = null)
     {
       _config = config;
       _statusLock = new object();

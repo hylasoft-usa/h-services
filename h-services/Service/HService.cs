@@ -4,7 +4,7 @@ using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Types;
 
-namespace Hylasoft.Services.Services
+namespace Hylasoft.Services.Service
 {
   public abstract class HService : IHService
   {

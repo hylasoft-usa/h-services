@@ -52,13 +52,9 @@
     <Compile Include="Interfaces\IMonitor.cs" />
     <Compile Include="Interfaces\IMonitoringConfig.cs" />
     <Compile Include="Interfaces\IHService.cs" />
-    <Compile Include="Interfaces\IServiceItemSetMonitor.cs" />
-    <Compile Include="Interfaces\IServiceMonitor.cs" />
     <Compile Include="Interfaces\IHServicesProvider.cs" />
     <Compile Include="Interfaces\IServiceValidator.cs" />
     <Compile Include="Interfaces\ISetMonitor.cs" />
-    <Compile Include="Monitoring\ServiceItemSetMonitor.cs" />
-    <Compile Include="Monitoring\ServiceMonitor.cs" />
     <Compile Include="Monitoring\SetMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Debugs.Designer.cs">
@@ -81,15 +77,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Warnings.resx</DependentUpon>
     </Compile>
-    <Compile Include="Services\HService.cs" />
+    <Compile Include="Service\HService.cs" />
     <Compile Include="Service\HServiceRoot.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Service\HServiceBase.cs" />
-    <Compile Include="Types\ServiceItem.cs" />
-    <Compile Include="Types\ServiceItemSet.cs" />
-    <Compile Include="Types\ServiceItemStates.cs" />
-    <Compile Include="Types\ServiceMethodInfo.cs" />
+    <Compile Include="Monitoring\HMonitor.cs" />
     <Compile Include="Types\ServiceStatuses.cs" />
     <Compile Include="Types\ServiceStatusTransition.cs" />
     <Compile Include="Utilities\ItemSetComparer.cs" />
@@ -115,6 +107,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Warnings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

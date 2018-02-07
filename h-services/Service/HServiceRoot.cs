@@ -6,8 +6,8 @@ using System.ServiceProcess;
 using Hylasoft.Extensions;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Monitoring;
 using Hylasoft.Services.Resources;
-using Hylasoft.Services.Services;
 using Hylasoft.Services.Types;
 
 namespace Hylasoft.Services.Service
