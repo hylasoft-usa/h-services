@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Monitoring.Base;
 using Hylasoft.Services.Utilities;
 
 namespace Hylasoft.Services.Monitoring
@@ -39,7 +40,7 @@ namespace Hylasoft.Services.Monitoring
       return ClearSet();
     }
 
-    protected override string ServiceName
+    public override string ServiceName
     {
       get { return MonitorName; }
     }

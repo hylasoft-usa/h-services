@@ -3,7 +3,7 @@ using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Types;
 
-namespace Hylasoft.Services.Service
+namespace Hylasoft.Services.Services.Base
 {
   public abstract class HServiceStatusBase : IServiceStatusElement
   {

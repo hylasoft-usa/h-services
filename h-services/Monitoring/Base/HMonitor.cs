@@ -4,10 +4,10 @@ using Hylasoft.Resolution;
 using Hylasoft.Services.Configuration;
 using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Resources;
-using Hylasoft.Services.Service;
+using Hylasoft.Services.Services.Base;
 using Hylasoft.Services.Types;
 
-namespace Hylasoft.Services.Monitoring
+namespace Hylasoft.Services.Monitoring.Base
 {
   public abstract class HMonitor : HServiceStatusBase, IMonitor
   {
@@ -114,7 +114,7 @@ namespace Hylasoft.Services.Monitoring
     #endregion
 
     #region Abstract Members
-    protected abstract string ServiceName { get; }
+    public abstract string ServiceName { get; }
 
     protected abstract Result InitializeService();
 

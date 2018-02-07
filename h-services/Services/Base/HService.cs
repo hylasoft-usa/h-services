@@ -5,7 +5,7 @@ using Hylasoft.Services.Resources;
 using Hylasoft.Services.Types;
 using Hylasoft.Services.Validation;
 
-namespace Hylasoft.Services.Service
+namespace Hylasoft.Services.Services.Base
 {
   public abstract class HService : HServiceStatusBase, IHService
   {
@@ -65,6 +65,8 @@ namespace Hylasoft.Services.Service
       return Result.ConcatRestricted(Stop, Start);
     }
 
+    public override ServiceStatuses Status { get { return _status; }}
+
     protected abstract Result InitalizeService();
     
     public event EventHandler<ServiceStatusTransition> StatusChanged;
@@ -76,9 +78,9 @@ namespace Hylasoft.Services.Service
     protected abstract Result OnStop();
 
     protected abstract Result OnPause();
-
-    protected abstract string ServiceName { get; }
-
+    
+    public abstract string ServiceName { get; }
+    
     private Result StateChange(ServiceStatuses status, Func<Result> action, string success, string fail, Result reason = null)
     {
       reason = reason ?? UserRequestedTransition;
@@ -143,13 +145,13 @@ namespace Hylasoft.Services.Service
     private Result SetStatus(ServiceStatuses status, Result reason)
     {
       ServiceStatuses oldStatus;
-      if ((oldStatus = _status) == status)
+      if ((oldStatus = Status) == status)
         return Result.Success;
 
       try
       {
         _status = status;
-        TriggerStatusChanged(oldStatus, status, reason);
+        TriggerStatusChanged(oldStatus, Status, reason);
         return Result.Success;
       }
       catch (Exception e)

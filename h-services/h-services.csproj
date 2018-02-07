@@ -78,12 +78,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Warnings.resx</DependentUpon>
     </Compile>
-    <Compile Include="Service\HService.cs" />
+    <Compile Include="Services\Base\HService.cs" />
+    <Compile Include="Services\MonitorSetService.cs" />
     <Compile Include="Service\HServiceRoot.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Monitoring\HMonitor.cs" />
-    <Compile Include="Service\HServiceStatusBase.cs" />
+    <Compile Include="Monitoring\Base\HMonitor.cs" />
+    <Compile Include="Services\Base\HServiceStatusBase.cs" />
     <Compile Include="Types\ServiceStatuses.cs" />
     <Compile Include="Types\ServiceStatusTransition.cs" />
     <Compile Include="Utilities\ItemSetComparer.cs" />
@@ -110,9 +111,7 @@
       <LastGenOutput>Warnings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

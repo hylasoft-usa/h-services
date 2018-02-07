@@ -19,5 +19,7 @@ namespace Hylasoft.Services.Interfaces
     event EventHandler<ServiceStatusTransition> StatusChanged;
 
     event EventHandler<Result> ErrorOccured;
+
+    string ServiceName { get; }
   }
 }
