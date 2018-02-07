@@ -1,27 +1,17 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using Hylasoft.Services.Interfaces;
-using Hylasoft.Services.Tests.Types;
+using Hylasoft.Services.Tests.Types.MonitorSets;
 using Hylasoft.Services.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Hylasoft.Services.Tests
 {
   [TestClass]
-  public class ServiceTests : TestBase
+  public class MonitorSetTests : TestBase
   {
     private readonly TestSetMonitor _testMonitor;
 
-    private readonly KeyValuePair<int, string>[] _initialValues =
-    {
-      new KeyValuePair<int, string>(1, "Test01"),
-      new KeyValuePair<int, string>(2, "Test02"),
-      new KeyValuePair<int, string>(3, "Test03") 
-    };
-
     protected TestSetMonitor TestMonitor { get { return _testMonitor; } }
-
-    protected KeyValuePair<int, string>[] InitialValues { get { return _initialValues; } }
 
     protected ServiceStatusTransition LastTransition { get; private set; }
 
@@ -33,7 +23,7 @@ namespace Hylasoft.Services.Tests
 
     protected int ChangeCount { get; private set; }
 
-    public ServiceTests()
+    public MonitorSetTests()
     {
       _testMonitor = BuildMonitor<TestSetMonitor>();
     }
@@ -202,13 +192,6 @@ namespace Hylasoft.Services.Tests
       Assert.IsTrue(monitor.IsFailed);
       Assert.AreEqual(monitor.Status, ServiceStatuses.Failed);
       Assert.IsFalse(LastTransition.Reason);
-    }
-
-    protected void InitializeSet(TestSetMonitor monitor)
-    {
-      monitor.InnerSet.Clear();
-      foreach (var value in InitialValues)
-        monitor.InnerSet.Add(value.Key, value.Value);
     }
 
     protected TMonitor BuildMonitor<TMonitor>()

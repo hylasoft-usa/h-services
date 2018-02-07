@@ -3,7 +3,7 @@ using System.Linq;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Monitoring;
 
-namespace Hylasoft.Services.Tests.Types
+namespace Hylasoft.Services.Tests.Types.MonitorSets
 {
   public class TestSetMonitor : SetMonitor<TestMonitorItem, int>
   {

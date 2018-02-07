@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Hylasoft.Resolution;
 
-namespace Hylasoft.Services.Tests.Types
+namespace Hylasoft.Services.Tests.Types.MonitorSets
 {
   public class FailedSetMonitor : TestSetMonitor
   {
