@@ -1,5 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
+using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Providers;
+using Hylasoft.Services.Service;
+using Hylasoft.Services.Tests.Types.Loggers;
 using Hylasoft.Services.Tests.Types.MonitorSets;
+using Hylasoft.Services.Tests.Types.Services;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Hylasoft.Services.Tests
 {
@@ -19,6 +26,55 @@ namespace Hylasoft.Services.Tests
       monitor.InnerSet.Clear();
       foreach (var value in InitialValues)
         monitor.InnerSet.Add(value.Key, value.Value);
+    }
+
+    protected TestSetMonitorService BuildTestSetMonitorService<TMonitor>()
+      where TMonitor : TestSetMonitor, new()
+    {
+      return new TestSetMonitorService(BuildTestMonitor<TMonitor>());
+    }
+    
+    protected TMonitor BuildTestMonitor<TMonitor>()
+      where TMonitor : TestSetMonitor, new()
+    {
+      var monitor = new TMonitor();
+      InitializeSet(monitor);
+
+      return monitor;
+    }
+
+    protected IHServiceRootRunner BuildRootRunner<TMonitor>(out TestSetMonitorService monitorService)
+      where TMonitor : TestSetMonitor, new()
+    {
+      monitorService = BuildTestSetMonitorService<TMonitor>();
+
+      var provider = BuildServicesProvider(monitorService);
+      return new HServiceRootRunner(provider);
+    }
+
+    protected IHServicesProvider BuildServicesProvider(params IHService[] services)
+    {
+      var logger = BuildLogger();
+      const string serviceName = "TestService";
+
+      return new HServiceProvider(serviceName, logger, services);
+    }
+
+    protected ILogger BuildLogger()
+    {
+      return new NullLogger();
+    }
+
+    protected void AssertChangedValue(TestSetMonitorService service, int key, string value)
+    {
+      service.ChangeItem(key, value);
+      while (!service.HasChanged)
+        Thread.Sleep(200);
+
+      TestMonitorItem item;
+      Assert.IsNotNull(item = service.ChangedItem);
+      Assert.AreEqual(item.Key, key);
+      Assert.AreEqual(item.Value, value);
     }
   }
 }
