@@ -36,6 +36,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Hylasoft.Extensions, Version=0.1.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Hylasoft.Extensions.0.1.10\lib\net45\Hylasoft.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Hylasoft.Resolution, Version=0.1.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Hylasoft.Resolution.0.1.4\lib\net45\Hylasoft.Resolution.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -54,12 +62,18 @@
     <Compile Include="ServiceTests.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Types\FailedSetMonitor.cs" />
+    <Compile Include="Types\TestMonitorItem.cs" />
+    <Compile Include="Types\TestSetMonitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\h-services\h-services.csproj">
       <Project>{823c21c2-f6d8-4552-8adc-2ca85e21d8fd}</Project>
       <Name>h-services</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

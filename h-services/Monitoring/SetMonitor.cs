@@ -17,14 +17,13 @@ namespace Hylasoft.Services.Monitoring
     private readonly Result _userRequestedTransition;
     private readonly Dictionary<TItemSpec, TItem> _set;
     private readonly object _statusLock;
-    private readonly Thread _runThread;
     private readonly ItemSetComparer<TItemSpec> _comparer;
     private readonly IMonitoringConfig _config;
     private ServiceStatuses _status;
 
     protected IDictionary<TItemSpec, TItem> Set { get { return _set; } }
 
-    protected Thread RunThread { get { return _runThread; } }
+    protected Thread RunThread { get; private set; }
 
     protected ItemSetComparer<TItemSpec> Comparer { get { return _comparer; } }
 
@@ -38,7 +37,6 @@ namespace Hylasoft.Services.Monitoring
     protected SetMonitor(IMonitoringConfig config = null)
     {
       _statusLock = new object();
-      _runThread = new Thread(MonitorLoop);
       _comparer = new ItemSetComparer<TItemSpec>(AreItemsEqual, GetItemSpecHash);
       _config = config ?? new DefaultMonitoringConfig();
 
@@ -54,13 +52,28 @@ namespace Hylasoft.Services.Monitoring
       if (IsRunning)
         return Result.SingleWarning(Warnings.MonitorIsAlreadyRunning, MonitorName);
 
-      Result start;
-      if (!(start = UpdateSet()))
-        return FailOut(start);
+      try
+      {
+        SetStatus(ServiceStatuses.Starting, UserRequestedTransition);
 
-      SetStatus(ServiceStatuses.Starting, UserRequestedTransition);
-      RunThread.Start();
-      return start;
+        Result start;
+        if (!(start = UpdateSet()))
+          return FailOut(start);
+
+        RunThread = new Thread(MonitorLoop);
+        RunThread.Start();
+
+        // TODO: Timeout.
+        while(!IsRunning)
+          Thread.Sleep(Config.MonitorSleepInMilliseconds);
+
+        return start;
+      }
+      catch (Exception e)
+      {
+        RunThread.Abort();
+        return FailOut(Result.Error(e));
+      }
     }
 
     public Result Stop()
@@ -72,10 +85,11 @@ namespace Hylasoft.Services.Monitoring
 
       try
       {
-        RunThread.Join(Config.AbortTimeoutInSeconds*1000);
+        RunThread.Join(Config.AbortTimeoutInSeconds * 1000);
       }
       catch (Exception e)
       {
+        RunThread.Abort();
         return FailOut(Result.Error(e));
       }
       finally
@@ -88,12 +102,52 @@ namespace Hylasoft.Services.Monitoring
 
     public ServiceStatuses Status
     {
-      get { return GetStatus(); } 
+      get { return GetStatus(); }
     }
 
-    public bool IsRunning { get { return Status == ServiceStatuses.Started; } }
-    
-    public bool IsStopped { get { return Status != ServiceStatuses.Stopped; } }
+    public bool IsRunning
+    {
+      get
+      {
+        switch (Status)
+        {
+          case ServiceStatuses.Started:
+            return true;
+        }
+
+        return false;
+      }
+    }
+
+    public bool IsStopped
+    {
+      get
+      {
+        switch (Status)
+        {
+          case ServiceStatuses.Stopping:
+          case ServiceStatuses.Stopped:
+          case ServiceStatuses.Failed:
+            return true;
+        }
+
+        return false;
+      }
+    }
+
+    public bool IsFailed
+    {
+      get
+      {
+        switch (Status)
+        {
+          case ServiceStatuses.Failed:
+            return true;
+        }
+
+        return false;
+      }
+    }
 
     public event EventHandler<ServiceStatusTransition> StatusChanged;
     #endregion
@@ -123,11 +177,16 @@ namespace Hylasoft.Services.Monitoring
       SetStatus(ServiceStatuses.Started, LastTransitionReason);
       while (IsRunning)
       {
-        UpdateSet();
+        Result update;
+        // TODO: Consider a re-try mechanism.
+        if (!(update = UpdateSet()))
+          FailOut(update);
+
         Thread.Sleep(Config.MonitorSleepInMilliseconds);
       }
 
-      SetStatus(ServiceStatuses.Stopped, LastTransitionReason);
+      if (!IsFailed)
+        SetStatus(ServiceStatuses.Stopped, LastTransitionReason);
     }
 
     private void SetStatus(ServiceStatuses status, Result reason)
