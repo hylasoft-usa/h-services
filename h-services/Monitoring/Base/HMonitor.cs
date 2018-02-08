@@ -111,6 +111,10 @@ namespace Hylasoft.Services.Monitoring.Base
     public event EventHandler<ServiceStatusTransition> StatusChanged;
     public event EventHandler<Result> ErrorOccured;
 
+    protected void RaiseError(Result error)
+    {
+      if (!error) TriggerErrorOccured(error);
+    }
     #endregion
 
     #region Abstract Members
@@ -186,6 +190,12 @@ namespace Hylasoft.Services.Monitoring.Base
     {
       if (StatusChanged != null)
         StatusChanged(this, new ServiceStatusTransition(oldStatus, newStatus, reason));
+    }
+
+    private void TriggerErrorOccured(Result error)
+    {
+      if (ErrorOccured != null)
+        ErrorOccured(this, error);
     }
 
     protected Result FailOut(Result reason)
