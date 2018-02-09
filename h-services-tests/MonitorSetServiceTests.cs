@@ -1,4 +1,5 @@
-﻿using Hylasoft.Services.Tests.Types.MonitorSets;
+﻿using System.Threading;
+using Hylasoft.Services.Tests.Types.MonitorSets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Hylasoft.Services.Tests
@@ -29,6 +30,23 @@ namespace Hylasoft.Services.Tests
 
       Assert.IsTrue(service.Start());
       AssertChangedValue(service, 1, "Changed01");
+      Assert.IsTrue(service.Stop());
+    }
+
+    [TestMethod]
+    public void TestSetMonitorNewlyAddedValue()
+    {
+      var service = BuildTestSetMonitorService<TestSetMonitor>();
+      Assert.IsTrue(service.Start());
+
+      const int newKey = 12;
+      const string newInitValue = "Value12";
+      const string newChangedValue = "Changed12";
+
+      service.InnerSet.Add(newKey, newInitValue);
+      Thread.Sleep(1000);
+
+      AssertChangedValue(service, newKey, newChangedValue);
       Assert.IsTrue(service.Stop());
     }
   }

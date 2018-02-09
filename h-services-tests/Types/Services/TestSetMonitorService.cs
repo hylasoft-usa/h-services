@@ -1,4 +1,5 @@
-﻿using Hylasoft.Services.Services;
+﻿using System.Collections.Generic;
+using Hylasoft.Services.Services;
 using Hylasoft.Services.Tests.Types.MonitorSets;
 
 namespace Hylasoft.Services.Tests.Types.Services
@@ -10,6 +11,8 @@ namespace Hylasoft.Services.Tests.Types.Services
     public bool HasChanged { get; private set; }
 
     public TestMonitorItem ChangedItem { get; private set; }
+
+    public IDictionary<int, string> InnerSet { get { return Monitor.InnerSet; } } 
 
     public TestSetMonitorService(TestSetMonitor monitor) : base(monitor)
     {

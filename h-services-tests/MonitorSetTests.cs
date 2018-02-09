@@ -156,6 +156,25 @@ namespace Hylasoft.Services.Tests
       Assert.IsTrue(LastTransition.Reason);
     }
 
+    [TestMethod]
+    public void TestNewlyAddedSetMonitorValues()
+    {
+      var monitor = TestMonitor;
+      var set = monitor.InnerSet;
+
+      const int newKey = 12;
+      const string newInitValue = "Value12";
+      const string newChangedValue = "Changed12";
+
+      Assert.IsTrue(monitor.Start());
+      set.Add(newKey, newInitValue);
+      Thread.Sleep(1000);
+
+      AssertValueChange(monitor, newKey, newChangedValue);
+
+      Assert.IsTrue(monitor.Stop());
+    }
+
     #region Handlers
     protected void OnMonitorTransition(object sender, ServiceStatusTransition transition)
     {
