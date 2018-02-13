@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 
 namespace Hylasoft.Services.Interfaces
 {
@@ -6,5 +7,7 @@ namespace Hylasoft.Services.Interfaces
     where TItem : class
   {
     event EventHandler<TItem> ItemChanged;
+
+    event EventHandler<Collection<TItem>> ItemsAdded;
   }
 }

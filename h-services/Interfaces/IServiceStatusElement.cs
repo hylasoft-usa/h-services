@@ -1,10 +1,26 @@
-﻿using Hylasoft.Services.Types;
+﻿using System;
+using Hylasoft.Resolution;
+using Hylasoft.Services.Types;
 
 namespace Hylasoft.Services.Interfaces
 {
   public interface IServiceStatusElement
   {
     ServiceStatuses Status { get; }
+
+    Result Initialize();
+
+    Result Start();
+
+    Result Stop();
+
+    Result Pause();
+
+    Result Restart();
+
+    event EventHandler<ServiceStatusTransition> StatusChanged;
+
+    string ServiceName { get; }
 
     bool IsRunning { get; }
 

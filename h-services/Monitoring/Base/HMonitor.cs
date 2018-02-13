@@ -11,104 +11,68 @@ namespace Hylasoft.Services.Monitoring.Base
 {
   public abstract class HMonitor : HServiceStatusBase, IMonitor
   {
-    private ServiceStatuses _status;
-    private readonly object _statusLock;
     private readonly IMonitoringConfig _config;
 
     protected IMonitoringConfig Config { get { return _config; } }
 
-    protected Result LastTransitionReason { get; private set; }
 
     protected Thread RunThread { get; private set; }
 
-    protected HMonitor(IMonitoringConfig config = null)
+    protected HMonitor(IMonitoringConfig config = null, IServiceValidator serviceValidator = null) : base(serviceValidator)
     {
-      _config = config;
-      _statusLock = new object();
       _config = config ?? new DefaultMonitoringConfig();
-
-      // TODO: Consider an unknown reason.
-      LastTransitionReason = UserRequestedTransition;
     }
 
-    public Result Initialize()
+    protected override Result InitializeService()
+    {
+      return OnInitialize();
+    }
+
+    protected override Result StartService()
     {
       try
       {
-        return InitializeService();
-      }
-      catch (Exception e)
-      {
-        return Result.Error(e);
-      }
-    }
-
-    public Result Start()
-    {
-      if (IsRunning)
-        return Result.SingleWarning(Warnings.MonitorIsAlreadyRunning, ServiceName);
-
-      try
-      {
-        SetStatus(ServiceStatuses.Starting, UserRequestedTransition);
-
-        Result start;
-        if (!(start = InitializeOnStartup()))
-          return FailOut(start);
-
         RunThread = new Thread(MonitorLoop);
         RunThread.Start();
-
-        // TODO: Timeout.
-        while (!IsRunning)
-          Thread.Sleep(Config.MonitorSleepInMilliseconds);
-
-        return start;
       }
       catch (Exception e)
       {
         RunThread.Abort();
-        return FailOut(Result.Error(e));
+        return Result.Error(e);        
       }
+
+      var tick = 0;
+      var timeout = (Config.AbortTimeoutInSeconds * 1000) / Config.MonitorSleepInMilliseconds;
+      while (!IsRunning && !IsFailed && tick++ <= timeout)
+        Thread.Sleep(Config.MonitorSleepInMilliseconds);
+
+      return (tick >= timeout)
+        ? Result.SingleError(Errors.TimedOutWaitingOnStart, ServiceName)
+        : Result.Success;
     }
 
-    #region IService Implementation
-    public Result Stop()
+    protected override Result StopService()
     {
-      if (IsStopped)
-        return Result.SingleWarning(Warnings.MonitorIsAlreadyStopped, ServiceName);
-
-      SetStatus(ServiceStatuses.Stopping, UserRequestedTransition);
-
       try
       {
+        SetStopped();
         RunThread.Join(Config.AbortTimeoutInSeconds * 1000);
       }
       catch (Exception e)
       {
         RunThread.Abort();
-        return CleanupOnShutdown() + FailOut(Result.Error(e));
+        return CleanupOnShutdown() + ErrorOut(Result.Error(e));
       }
 
       return CleanupOnShutdown();
     }
 
-    public Result Pause()
+    protected override Result PauseService()
     {
-      return SetStatus(ServiceStatuses.Paused, UserRequestedTransition);
+      return Result.Success;
     }
 
-    public Result Restart()
-    {
-      return Result.ConcatRestricted(Stop, Start);
-    }
-
-    public override ServiceStatuses Status
-    {
-      get { return GetStatus(); }
-    }
-
-    public event EventHandler<ServiceStatusTransition> StatusChanged;
+    #region IService Implementation
     public event EventHandler<Result> ErrorOccured;
 
     protected void RaiseError(Result error)
@@ -118,13 +82,9 @@ namespace Hylasoft.Services.Monitoring.Base
     #endregion
 
     #region Abstract Members
-    public abstract string ServiceName { get; }
-
-    protected abstract Result InitializeService();
+    protected abstract Result OnInitialize();
 
     protected abstract Result PerformServiceLoop();
-
-    protected abstract Result InitializeOnStartup();
 
     protected abstract Result CleanupOnShutdown();
     #endregion
@@ -135,77 +95,31 @@ namespace Hylasoft.Services.Monitoring.Base
       if (Status != ServiceStatuses.Starting)
         return;
 
-      SetStatus(ServiceStatuses.Started, LastTransitionReason);
+      Result loop;
+      // Run loop once, to verify it can.
+      if (!(loop = PerformServiceLoop()))
+        ErrorOut(loop);
+
+      SetRunning(LastTransitionReason);
       while (IsRunning || IsPaused)
       {
-        Result loop;
         // TODO: Consider a re-try mechanism.
         if (IsRunning && !(loop = PerformServiceLoop()))
-          FailOut(loop);
+          ErrorOut(loop);
 
         Thread.Sleep(Config.MonitorSleepInMilliseconds);
       }
 
       if (!IsFailed)
-        SetStatus(ServiceStatuses.Stopped, LastTransitionReason);
-    }
-
-    private Result SetStatus(ServiceStatuses status, Result reason)
-    {
-      var hasChanged = false;
-      ServiceStatuses oldStatus;
-      lock (_statusLock)
-      {
-        if ((oldStatus = _status) != status)
-        {
-          _status = status;
-          hasChanged = true;
-        }
-      }
-
-      if (hasChanged)
-      {
-        LastTransitionReason = reason;
-        TriggerStatusChanged(oldStatus, Status, reason);
-      }
-
-      return reason;
-    }
-
-    private ServiceStatuses GetStatus()
-    {
-      ServiceStatuses status;
-      lock (_statusLock)
-      {
-        status = _status;
-      }
-
-      return status;
+        SetStopped(loop);
     }
     #endregion
 
-
     #region Helper Methods
-    private void TriggerStatusChanged(ServiceStatuses oldStatus, ServiceStatuses newStatus, Result reason)
-    {
-      if (StatusChanged != null)
-        StatusChanged(this, new ServiceStatusTransition(oldStatus, newStatus, reason));
-    }
-
     private void TriggerErrorOccured(Result error)
     {
       if (ErrorOccured != null)
         ErrorOccured(this, error);
-    }
-
-    protected Result FailOut(Result reason)
-    {
-      var newStatus = reason
-        ? ServiceStatuses.Stopped
-        : ServiceStatuses.Failed;
-
-      SetStatus(newStatus, reason);
-      return reason;
     }
     #endregion
   }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Monitoring;
 
@@ -7,14 +8,48 @@ namespace Hylasoft.Services.Tests.Types.MonitorSets
 {
   public class TestSetMonitor : SetMonitor<TestMonitorItem, int>
   {
+    private readonly object _updateLock = new object();
     private readonly Dictionary<int, string> _innerSet;
+    private bool _updateOccured;
+
+    protected bool UpdateOccured
+    {
+      get
+      {
+        lock (_updateLock)
+          return _updateOccured;
+      }
+
+      private set
+      {
+        lock (_updateLock)
+          _updateOccured = value;
+      }
+    }
 
     public TestSetMonitor()
     {
       _innerSet = new Dictionary<int, string>();
     }
 
+    public void WaitOnUpdate()
+    {
+      UpdateOccured = false;
+      while(IsRunning && !UpdateOccured)
+        Thread.Sleep(100);
+    }
+
     public IDictionary<int, string> InnerSet { get { return _innerSet; } }
+
+    protected sealed override Result PerformServiceLoop()
+    {
+      var cleanSlate = !UpdateOccured;
+      var perform = base.PerformServiceLoop();
+      if (cleanSlate)
+        UpdateOccured = true;
+
+      return perform;
+    }
 
     protected override Result FetchSet(out IEnumerable<TestMonitorItem> items)
     {

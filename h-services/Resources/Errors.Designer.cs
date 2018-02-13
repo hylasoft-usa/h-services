@@ -70,6 +70,15 @@ namespace Hylasoft.Services.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A logical fallacy as occured in h-services..
+        /// </summary>
+        internal static string LogicalFallacy {
+            get {
+                return ResourceManager.GetString("LogicalFallacy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Provided schedule was null..
         /// </summary>
         internal static string ScheduleNullError {
@@ -120,6 +129,15 @@ namespace Hylasoft.Services.Resources {
         internal static string ServiceStopFailed {
             get {
                 return ResourceManager.GetString("ServiceStopFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Timed out waiting on {0} to start..
+        /// </summary>
+        internal static string TimedOutWaitingOnStart {
+            get {
+                return ResourceManager.GetString("TimedOutWaitingOnStart", resourceCulture);
             }
         }
     }

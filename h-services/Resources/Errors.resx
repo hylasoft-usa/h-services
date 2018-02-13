@@ -120,6 +120,9 @@
   <data name="DataTagNullError" xml:space="preserve">
     <value>Subscribed tag was incomplete.</value>
   </data>
+  <data name="LogicalFallacy" xml:space="preserve">
+    <value>A logical fallacy as occured in h-services.</value>
+  </data>
   <data name="ScheduleNullError" xml:space="preserve">
     <value>Provided schedule was null.</value>
   </data>
@@ -137,5 +140,8 @@
   </data>
   <data name="ServiceStopFailed" xml:space="preserve">
     <value>{0} failed to stop.</value>
+  </data>
+  <data name="TimedOutWaitingOnStart" xml:space="preserve">
+    <value>Timed out waiting on {0} to start.</value>
   </data>
 </root>

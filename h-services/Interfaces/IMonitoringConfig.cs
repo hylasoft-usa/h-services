@@ -4,6 +4,8 @@
 	{
     int AbortTimeoutInSeconds { get; }
 
+    int StartupTimeoutInSeconds { get; }
+
     int MonitorSleepInMilliseconds { get; }
 	}
 }
