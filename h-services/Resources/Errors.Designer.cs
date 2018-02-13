@@ -131,5 +131,14 @@ namespace Hylasoft.Services.Resources {
                 return ResourceManager.GetString("ServiceStopFailed", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Timed out waiting on {0} to start..
+        /// </summary>
+        internal static string TimedOutWaitingOnStart {
+            get {
+                return ResourceManager.GetString("TimedOutWaitingOnStart", resourceCulture);
+            }
+        }
     }
 }

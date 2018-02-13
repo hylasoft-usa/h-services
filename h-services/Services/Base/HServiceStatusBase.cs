@@ -23,12 +23,15 @@ namespace Hylasoft.Services.Services.Base
 
     protected IServiceValidator ServiceValidator { get { return _serviceValidator; } }
 
+    protected Result LastTransitionReason { get; private set; }
+
     protected HServiceStatusBase(IServiceValidator serviceValidator = null)
     {
       _status = ServiceStatuses.Stopped;
       _serviceValidator = serviceValidator ?? new ServiceValidator();
       _userRequestedTransition = Result.SingleDebug(Debugs.UserRequestedTransition);
       IsInitialized = false;
+      LastTransitionReason = UserRequestedTransition;
     }
 
     #region IServiceStatusElement Implementation
@@ -242,10 +245,6 @@ namespace Hylasoft.Services.Services.Base
 
     protected abstract Result PauseService();
 
-    protected abstract Result RestartService();
-
-    protected abstract Result SetStatus(ServiceStatuses status);
-
     public abstract string ServiceName { get; }
     #endregion
 
@@ -295,6 +294,7 @@ namespace Hylasoft.Services.Services.Base
       {
         _status = status;
         TriggerStatusChanged(oldStatus, Status, reason);
+        LastTransitionReason = reason;
         return Result.Success;
       }
       catch (Exception e)
@@ -323,8 +323,8 @@ namespace Hylasoft.Services.Services.Base
         var status = error
           ? ServiceStatuses.Stopped
           : ServiceStatuses.Failed;
-        
-        SetStatus(status);
+
+        error += TransitionStatus(status);
       }
       catch (Exception transitionFailed)
       {

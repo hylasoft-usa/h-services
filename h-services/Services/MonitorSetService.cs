@@ -12,13 +12,13 @@ namespace Hylasoft.Services.Services
 
     protected TMonitor Monitor { get { return _monitor; } }
 
-    protected MonitorSetService(TMonitor monitor)
+    protected MonitorSetService(TMonitor monitor, IServiceValidator serviceValidator) : base(serviceValidator)
     {
       _monitor = monitor;
     }
 
     #region HService Implementation
-    protected override Result InitalizeService()
+    protected override Result OnInitialize()
     {
       Result init;
       if (!(init = Monitor.Initialize()))

@@ -141,4 +141,7 @@
   <data name="ServiceStopFailed" xml:space="preserve">
     <value>{0} failed to stop.</value>
   </data>
+  <data name="TimedOutWaitingOnStart" xml:space="preserve">
+    <value>Timed out waiting on {0} to start.</value>
+  </data>
 </root>
