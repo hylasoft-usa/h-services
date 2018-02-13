@@ -43,10 +43,9 @@ namespace Hylasoft.Services.Tests
       const string newInitValue = "Value12";
       const string newChangedValue = "Changed12";
 
-      service.InnerSet.Add(newKey, newInitValue);
-      Thread.Sleep(1000);
-
+      AssertAddedValue(service, newKey, newInitValue);
       AssertChangedValue(service, newKey, newChangedValue);
+      
       Assert.IsTrue(service.Stop());
     }
   }

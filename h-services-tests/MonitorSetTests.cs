@@ -1,4 +1,6 @@
-﻿using Hylasoft.Services.Interfaces;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Tests.Types.MonitorSets;
 using Hylasoft.Services.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,11 +18,13 @@ namespace Hylasoft.Services.Tests
 
     protected TestMonitorItem LastChange { get; private set; }
 
-    protected bool WaitingOnChange { get; private set; }
+    protected Collection<TestMonitorItem> LastAdded { get; private set; } 
 
     protected int TransitionCount { get; private set; }
 
     protected int ChangeCount { get; private set; }
+
+    protected int AddCount { get; private set; }
 
     public MonitorSetTests()
     {
@@ -159,16 +163,14 @@ namespace Hylasoft.Services.Tests
     public void TestNewlyAddedSetMonitorValues()
     {
       var monitor = TestMonitor;
-      var set = monitor.InnerSet;
 
       const int newKey = 12;
       const string newInitValue = "Value12";
       const string newChangedValue = "Changed12";
 
       Assert.IsTrue(monitor.Start());
-      set.Add(newKey, newInitValue);
-      monitor.WaitOnUpdate();
-
+      
+      AssertValueAdd(monitor, newKey, newInitValue);
       AssertValueChange(monitor, newKey, newChangedValue);
 
       Assert.IsTrue(monitor.Stop());
@@ -185,7 +187,12 @@ namespace Hylasoft.Services.Tests
     {
       LastChange = testItem;
       ++ChangeCount;
-      WaitingOnChange = false;
+    }
+
+    protected void OnItemsAdded(object sender, Collection<TestMonitorItem> newItems)
+    {
+      LastAdded = newItems;
+      ++AddCount;
     }
     #endregion
 
@@ -193,13 +200,30 @@ namespace Hylasoft.Services.Tests
     protected void AssertValueChange(TestSetMonitor monitor, int key, string value)
     {
       Assert.AreNotEqual(monitor.InnerSet[key], value);
-      WaitingOnChange = true;
       monitor.InnerSet[key] = value;
       monitor.WaitOnUpdate();
 
       Assert.IsNotNull(LastChange);
       Assert.AreEqual(LastChange.Key, key);
       Assert.AreEqual(LastChange.Value, value);
+    }
+
+    protected void AssertValueAdd(TestSetMonitor monitor, int key, string value)
+    {
+      Assert.IsNotNull(monitor);
+      var innerSet = monitor.InnerSet;
+      Assert.IsFalse(innerSet.ContainsKey(key));
+
+      innerSet.Add(key, value);
+      monitor.WaitOnUpdate();
+
+      Assert.IsNotNull(LastAdded);
+      Assert.AreEqual(LastAdded.Count, 1);
+
+      TestMonitorItem added;
+      Assert.IsNotNull(added = LastAdded.FirstOrDefault());
+      Assert.AreEqual(added.Key, key);
+      Assert.AreEqual(added.Value, value);
     }
 
     protected void AssertIsFailed(IMonitor monitor)
@@ -216,6 +240,7 @@ namespace Hylasoft.Services.Tests
 
       monitor.StatusChanged += OnMonitorTransition;
       monitor.ItemChanged += OnItemChanged;
+      monitor.ItemsAdded += OnItemsAdded;
 
       return monitor;
     }

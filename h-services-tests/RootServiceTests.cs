@@ -33,5 +33,16 @@ namespace Hylasoft.Services.Tests
       AssertChangedValue(testService, 1, "FromServiceRoot01");
       root.OnStop();
     }
+
+    [TestMethod]
+    public void TestServiceRootValueAdded()
+    {
+      TestSetMonitorService testService;
+      var root = BuildRootRunner<TestSetMonitor>(out testService);
+
+      root.OnStart(new string[0]);
+      AssertAddedValue(testService, 5, "NewFromServiceRoot");
+      root.OnStop();
+    }
   }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Threading;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Providers;
 using Hylasoft.Services.Service;
@@ -68,13 +69,27 @@ namespace Hylasoft.Services.Tests
     protected void AssertChangedValue(TestSetMonitorService service, int key, string value)
     {
       service.ChangeItem(key, value);
-      while (!service.HasChanged)
-        Thread.Sleep(200);
+      service.WaitOnUpdate();
 
       TestMonitorItem item;
       Assert.IsNotNull(item = service.ChangedItem);
       Assert.AreEqual(item.Key, key);
       Assert.AreEqual(item.Value, value);
+    }
+
+    protected void AssertAddedValue(TestSetMonitorService service, int key, string value)
+    {
+      service.AddItem(key, value);
+      service.WaitOnUpdate();
+
+      Collection<TestMonitorItem> newItems;
+      Assert.IsNotNull(newItems = service.NewItems);
+      Assert.AreEqual(newItems.Count, 1);
+
+      TestMonitorItem added;
+      Assert.IsNotNull(added = newItems.FirstOrDefault());
+      Assert.AreEqual(added.Key, key);
+      Assert.AreEqual(added.Value, value);
     }
   }
 }

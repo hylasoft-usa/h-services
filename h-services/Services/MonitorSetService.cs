@@ -1,4 +1,5 @@
-﻿using Hylasoft.Resolution;
+﻿using System.Collections.ObjectModel;
+using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Services.Base;
 
@@ -25,6 +26,7 @@ namespace Hylasoft.Services.Services
         return init;
 
       Monitor.ItemChanged += OnItemChange;
+      Monitor.ItemsAdded += OnItemsAdded;
       return init;
     }
 
@@ -51,6 +53,9 @@ namespace Hylasoft.Services.Services
 
     #region Abstract Methods
     protected abstract void OnItemChange(object sender, TItem changedItem);
+
+    protected abstract void OnItemsAdded(object sender, Collection<TItem> newItems);
+
     #endregion
   }
 }
