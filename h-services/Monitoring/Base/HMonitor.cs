@@ -60,7 +60,7 @@ namespace Hylasoft.Services.Monitoring.Base
         RunThread.Start();
 
         // TODO: Timeout.
-        while (!IsRunning)
+        while (!IsRunning && !IsFailed)
           Thread.Sleep(Config.MonitorSleepInMilliseconds);
 
         return start;

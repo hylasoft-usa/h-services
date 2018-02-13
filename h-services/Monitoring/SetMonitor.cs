@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using Hylasoft.Extensions;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Monitoring.Base;
+using Hylasoft.Services.Resources;
 using Hylasoft.Services.Utilities;
 
 namespace Hylasoft.Services.Monitoring
@@ -54,6 +57,8 @@ namespace Hylasoft.Services.Monitoring
 
     #region Abstract Methods
     public event EventHandler<TItem> ItemChanged;
+    
+    public event EventHandler<Collection<TItem>> ItemsAdded;
 
     protected abstract Result FetchSet(out IEnumerable<TItem> items);
 
@@ -77,7 +82,17 @@ namespace Hylasoft.Services.Monitoring
         return update;
 
       var currentSet = currentItems.ToArray();
-      if (!(update += Result.Concat(UpdateItem, currentSet)))
+      var existingSet = Set.Values;
+
+      var newItems = currentSet.Except(existingSet).ToArray();
+      var existingItems = existingSet.Except(newItems);
+
+      if (!(update += Result.Concat(AddItem, newItems)))
+        return update;
+
+      TriggerItemsAdded(newItems);
+
+      if (!(update += Result.Concat(UpdateItem, existingItems)))
         return update;
 
       return update + ClearMissingItems(currentSet);
@@ -97,9 +112,9 @@ namespace Hylasoft.Services.Monitoring
 
       var specification = GetSpecification(item);
 
-      // If the item doesn't exist yet, simply add it.
+      // Something went very wrong.
       if (!Set.ContainsKey(specification))
-        return AddItem(specification, item);
+        return Result.SingleError(Errors.LogicalFallacy);
 
       var existingItem = Set[specification];
       // Update if existing item has changed.
@@ -108,10 +123,11 @@ namespace Hylasoft.Services.Monitoring
         : Result.Success;
     }
 
-    protected Result AddItem(TItemSpec spec, TItem item)
+    protected Result AddItem(TItem item)
     {
       try
       {
+        var spec = GetSpecification(item);
         Set.Add(spec, item);
 
         // TODO: Consider adding a trace statement.
@@ -159,6 +175,13 @@ namespace Hylasoft.Services.Monitoring
     {
       if (ItemChanged != null)
         ItemChanged(this, item);
+    }
+
+    private void TriggerItemsAdded(IEnumerable<TItem> items)
+    {
+      Collection<TItem> addedItems;
+      if (ItemsAdded != null && items != null && (addedItems = items.ToCollection()).Any())
+        ItemsAdded(this, addedItems);
     }
     #endregion
   }
