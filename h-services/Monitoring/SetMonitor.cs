@@ -21,19 +21,20 @@ namespace Hylasoft.Services.Monitoring
 
     protected ItemSetComparer<TItemSpec> Comparer { get { return _comparer; } }
 
-    protected SetMonitor(IMonitoringConfig config = null) : base(config)
+    protected SetMonitor(IMonitoringConfig config = null, IServiceValidator serviceValidator = null) : base(config, serviceValidator)
     {
       _comparer = new ItemSetComparer<TItemSpec>(AreItemsEqual, GetItemSpecHash);
       _set = new Dictionary<TItemSpec, TItem>(Comparer);
     }
 
     #region ServiceBase Implementation
-    protected override Result PerformServiceLoop()
+
+    protected override Result OnInitialize()
     {
       return UpdateSet();
     }
 
-    protected override Result InitializeOnStartup()
+    protected override Result PerformServiceLoop()
     {
       return UpdateSet();
     }
@@ -81,10 +82,13 @@ namespace Hylasoft.Services.Monitoring
         return update;
 
       var currentSet = currentItems.ToArray();
-      var existingSet = Set.Values;
+      var currentKeys = currentSet.Select(GetSpecification).ToArray();
 
-      var newItems = currentSet.Except(existingSet).ToArray();
-      var existingItems = existingSet.Except(newItems);
+      var newItemKeys = currentKeys.Where(key => !Set.ContainsKey(key));
+      var existingItemKeys = currentKeys.Where(key => Set.ContainsKey(key));
+
+      var newItems = currentSet.Where(item => newItemKeys.Contains(GetSpecification(item))).ToArray();
+      var existingItems = currentSet.Where(item => existingItemKeys.Contains(GetSpecification(item))).ToArray();
 
       if (!(update += Result.Concat(AddItem, newItems)))
         return update;

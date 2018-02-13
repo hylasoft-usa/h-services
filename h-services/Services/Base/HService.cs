@@ -23,6 +23,11 @@ namespace Hylasoft.Services.Services.Base
       return TransitionService(OnStart, Messages.ServiceStarted, Errors.ServiceStartFailed);
     }
 
+    protected override Result StopService()
+    {
+      return TransitionService(OnStop, Messages.ServiceStopped, Errors.ServiceStopFailed);
+    }
+
     protected override Result PauseService()
     {
       return TransitionService(OnPause, Messages.ServicePaused, Errors.ServicePauseFailed);

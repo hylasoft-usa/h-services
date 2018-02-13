@@ -86,8 +86,6 @@ namespace Hylasoft.Services.Monitoring.Base
 
     protected abstract Result PerformServiceLoop();
 
-    protected abstract Result InitializeOnStartup();
-
     protected abstract Result CleanupOnShutdown();
     #endregion
 
