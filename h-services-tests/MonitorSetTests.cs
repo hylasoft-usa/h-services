@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using Hylasoft.Services.Interfaces;
+﻿using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Tests.Types.MonitorSets;
 using Hylasoft.Services.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -97,7 +96,7 @@ namespace Hylasoft.Services.Tests
 
       // Setting the value to itself.
       TestMonitor.InnerSet[key] = value;
-      Thread.Sleep(1000);
+      TestMonitor.WaitOnUpdate();
       Assert.AreEqual(ChangeCount, 2);
 
       Assert.IsTrue(TestMonitor.Stop());
@@ -131,7 +130,7 @@ namespace Hylasoft.Services.Tests
       AssertValueChange(failMonitor, 2, "Changed02");
 
       failMonitor.ShouldFail = true;
-      Thread.Sleep(1000);
+      failMonitor.WaitOnUpdate();
 
       // + Failed
       Assert.AreEqual(TransitionCount, transCount += 1);
@@ -168,7 +167,7 @@ namespace Hylasoft.Services.Tests
 
       Assert.IsTrue(monitor.Start());
       set.Add(newKey, newInitValue);
-      Thread.Sleep(1000);
+      monitor.WaitOnUpdate();
 
       AssertValueChange(monitor, newKey, newChangedValue);
 
@@ -194,12 +193,9 @@ namespace Hylasoft.Services.Tests
     protected void AssertValueChange(TestSetMonitor monitor, int key, string value)
     {
       Assert.AreNotEqual(monitor.InnerSet[key], value);
-
       WaitingOnChange = true;
       monitor.InnerSet[key] = value;
-
-      while(WaitingOnChange)
-        Thread.Sleep(500);
+      monitor.WaitOnUpdate();
 
       Assert.IsNotNull(LastChange);
       Assert.AreEqual(LastChange.Key, key);
