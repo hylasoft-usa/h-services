@@ -52,7 +52,6 @@ namespace Hylasoft.Services.Monitoring
     {
       return Result.Success;
     }
-
     #endregion
 
     #region Abstract Methods

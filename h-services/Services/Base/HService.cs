@@ -10,15 +10,10 @@ namespace Hylasoft.Services.Services.Base
   public abstract class HService : HServiceStatusBase, IHService
   {
     private bool _initialized;
-    private ServiceStatuses _status;
-    private readonly IServiceValidator _serviceValidator;
 
-    protected IServiceValidator ServiceValidator { get { return _serviceValidator; } }
 
     protected HService(IServiceValidator serviceValidator = null)
     {
-      _serviceValidator = serviceValidator ?? new ServiceValidator();
-      _status = ServiceStatuses.Stopped;
       _initialized = false;
     }
 
@@ -65,22 +60,6 @@ namespace Hylasoft.Services.Services.Base
       return Result.ConcatRestricted(Stop, Start);
     }
 
-    public override ServiceStatuses Status { get { return _status; }}
-
-    protected abstract Result InitalizeService();
-    
-    public event EventHandler<ServiceStatusTransition> StatusChanged;
-
-    public event EventHandler<Result> ErrorOccured;
-
-    protected abstract Result OnStart();
-
-    protected abstract Result OnStop();
-
-    protected abstract Result OnPause();
-    
-    public abstract string ServiceName { get; }
-    
     private Result StateChange(ServiceStatuses status, Func<Result> action, string success, string fail, Result reason = null)
     {
       reason = reason ?? UserRequestedTransition;
@@ -108,63 +87,21 @@ namespace Hylasoft.Services.Services.Base
         : Result.SingleError(fail, this));
     }
 
-    protected Result SetRunning(Result reason)
-    {
-      return TransitionStatus(ServiceStatuses.Started, reason);
-    }
+    protected abstract Result InitalizeService();
+    
+    public event EventHandler<ServiceStatusTransition> StatusChanged;
 
-    protected Result SetStopped(Result reason)
-    {
-      return TransitionStatus(ServiceStatuses.Stopped, reason);
-    }
+    public event EventHandler<Result> ErrorOccured;
 
-    protected Result SetPaused(Result reason)
-    {
-      return TransitionStatus(ServiceStatuses.Paused, reason);
-    }
+    protected abstract Result OnStart();
 
-    private Result TransitionStatus(ServiceStatuses status, Result reason)
-    {
-      Result transition;
-      if (!(transition = CanTransitionTo(status)))
-        return transition;
+    protected abstract Result OnStop();
 
-      return transition + SetStatus(status, reason);
-    }
-
-    private Result CanTransitionTo(ServiceStatuses status)
-    {
-      var currentStatus = Status;
-      var acceptedTransitions = ServiceValidator.GetStatusTransitions(status);
-
-      return acceptedTransitions.Contains(currentStatus)
-        ? Result.Success
-        : Result.SingleError(Warnings.ServiceStatusTransitionNotAllowed, currentStatus, status);
-    }
-
-    private Result SetStatus(ServiceStatuses status, Result reason)
-    {
-      ServiceStatuses oldStatus;
-      if ((oldStatus = Status) == status)
-        return Result.Success;
-
-      try
-      {
-        _status = status;
-        TriggerStatusChanged(oldStatus, Status, reason);
-        return Result.Success;
-      }
-      catch (Exception e)
-      {
-        return reason + Result.Error(e);
-      }
-    }
-
-    private void TriggerStatusChanged(ServiceStatuses oldStatus, ServiceStatuses newStatus, Result reason)
-    {
-      if (StatusChanged != null)
-        StatusChanged(this, new ServiceStatusTransition(oldStatus, newStatus, reason));
-    }
+    protected abstract Result OnPause();
+    
+    public abstract string ServiceName { get; }
+    
+    
 
     protected void TriggerErrorOccured(Result error)
     {
