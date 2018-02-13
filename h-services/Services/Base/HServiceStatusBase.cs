@@ -56,11 +56,7 @@ namespace Hylasoft.Services.Services.Base
       try
       {
         lock (_initializationLock)
-        {
-          return IsInitialized
-            ? Result.SingleWarning(Warnings.ServiceAlreadyInitialized, ServiceName) 
-            : InitializeService();
-        }
+          return LockedInitialize();
       }
       catch (Exception e)
       {
@@ -191,7 +187,11 @@ namespace Hylasoft.Services.Services.Base
     #region Domain Methods
     private Result LockedStart()
     {
-      return LockedMajorTransition(ServiceStatuses.Starting, ServiceStatuses.Started, StartService,
+      var start = Result.Success;
+      if (!IsInitialized && !(start += Initialize()))
+        return start;
+
+      return start + LockedMajorTransition(ServiceStatuses.Starting, ServiceStatuses.Started, StartService,
         IsRunning, Warnings.MonitorIsAlreadyRunning);
     }
 
@@ -208,12 +208,25 @@ namespace Hylasoft.Services.Services.Base
 
       Result pause;
       if (!(pause = PauseService()))
-        return pause;
+        return ErrorOut(pause);
       
       if (Status != ServiceStatuses.Paused)
         pause += TransitionStatus(ServiceStatuses.Paused);
 
       return pause;
+    }
+
+    private Result LockedInitialize()
+    {
+      if (IsInitialized)
+        return Result.SingleWarning(Warnings.ServiceAlreadyInitialized, ServiceName);
+
+      Result init;
+      if (!(init = InitializeService()))
+        return ErrorOut(init);
+
+      IsInitialized = true;
+      return init;
     }
 
     private Result LockedMajorTransition(ServiceStatuses initialTransition, ServiceStatuses finalTransition,
@@ -324,7 +337,7 @@ namespace Hylasoft.Services.Services.Base
           ? ServiceStatuses.Stopped
           : ServiceStatuses.Failed;
 
-        error += TransitionStatus(status);
+        error += TransitionStatus(status, error);
       }
       catch (Exception transitionFailed)
       {

@@ -28,7 +28,6 @@ namespace Hylasoft.Services.Monitoring
     }
 
     #region ServiceBase Implementation
-
     protected override Result OnInitialize()
     {
       return UpdateSet();
@@ -51,7 +50,7 @@ namespace Hylasoft.Services.Monitoring
 
     protected override Result InitializeService()
     {
-      return Result.Success;
+      return OnInitialize();
     }
     #endregion
 

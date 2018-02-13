@@ -95,8 +95,12 @@ namespace Hylasoft.Services.Monitoring.Base
       if (Status != ServiceStatuses.Starting)
         return;
 
+      Result loop;
+      // Run loop once, to verify it can.
+      if (!(loop = PerformServiceLoop()))
+        ErrorOut(loop);
+
       SetRunning(LastTransitionReason);
-      var loop = Result.Success;
       while (IsRunning || IsPaused)
       {
         // TODO: Consider a re-try mechanism.

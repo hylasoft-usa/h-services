@@ -109,8 +109,8 @@ namespace Hylasoft.Services.Tests
       var failMonitor = BuildFailMonitor(true);
       Assert.IsFalse(failMonitor.Start());
 
-      // Expected Starting, Failed
-      Assert.AreEqual(TransitionCount, 2);
+      // Expected Failed
+      Assert.AreEqual(TransitionCount, 1);
       AssertIsFailed(failMonitor);
     }
 
