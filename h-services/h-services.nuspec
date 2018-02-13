@@ -8,7 +8,7 @@
     <owners>Hylasoft USA</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Adjusts dependency versions.</releaseNotes>
+    <releaseNotes>Adds set monitor add event.</releaseNotes>
     <copyright>Copyright 2018</copyright>
     <tags>ErrorCollection</tags>
     <dependencies>
