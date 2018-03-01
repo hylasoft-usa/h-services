@@ -91,5 +91,21 @@ namespace Hylasoft.Services.Tests
       Assert.AreEqual(added.Key, key);
       Assert.AreEqual(added.Value, value);
     }
+
+    protected void AssertRemovedValue(TestSetMonitorService service, int key)
+    {
+      var initialStatus = service.Status;
+      service.RemoveItem(key);
+      service.WaitOnUpdate();
+
+      Collection<TestMonitorItem> removedItems;
+      Assert.AreEqual(service.Status, initialStatus);
+      Assert.IsNotNull(removedItems = service.RemovedItems);
+      Assert.AreEqual(removedItems.Count, 1);
+
+      TestMonitorItem removed;
+      Assert.IsNotNull(removed = removedItems.FirstOrDefault());
+      Assert.AreEqual(removed.Key, key);
+    }
   }
 }

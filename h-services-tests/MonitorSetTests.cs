@@ -192,6 +192,8 @@ namespace Hylasoft.Services.Tests
 
       AssertValueAdd(monitor, newKey, newVal);
       AssertValueChange(monitor, newKey, newValChanged);
+
+      Assert.IsTrue(monitor.Stop());
     }
 
     #region Handlers

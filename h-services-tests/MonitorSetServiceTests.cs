@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using Hylasoft.Services.Tests.Types.MonitorSets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -46,6 +47,28 @@ namespace Hylasoft.Services.Tests
       AssertAddedValue(service, newKey, newInitValue);
       AssertChangedValue(service, newKey, newChangedValue);
       
+      Assert.IsTrue(service.Stop());
+    }
+
+    [TestMethod]
+    public void TestSetMonitorRemovedValue()
+    {
+      var service = BuildTestSetMonitorService<TestSetMonitor>();
+      Assert.IsTrue(service.Start());
+
+      var removedItem = InitialValues.FirstOrDefault();
+      Assert.IsNotNull(removedItem);
+
+      var itemToRemove = removedItem.Key;
+      AssertRemovedValue(service, itemToRemove);
+
+      const int newKey = 15;
+      const string newInitValue = "Value15";
+      const string newChangedValue = "Changed15";
+
+      AssertAddedValue(service, newKey, newInitValue);
+      AssertChangedValue(service, newKey, newChangedValue);
+
       Assert.IsTrue(service.Stop());
     }
   }
