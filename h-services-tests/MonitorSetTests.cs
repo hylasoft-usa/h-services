@@ -176,6 +176,24 @@ namespace Hylasoft.Services.Tests
       Assert.IsTrue(monitor.Stop());
     }
 
+    [TestMethod]
+    public void TestRemovedSetMonitorValues()
+    {
+      var monitor = TestMonitor;
+
+      var valueToRemove = InitialValues.FirstOrDefault();
+      Assert.IsNotNull(valueToRemove);
+      Assert.IsTrue(monitor.Start());
+      AssertValueRemove(monitor, valueToRemove.Key);
+
+      const int newKey = 5;
+      const string newVal = "Value5";
+      const string newValChanged = "ValueChanged5";
+
+      AssertValueAdd(monitor, newKey, newVal);
+      AssertValueChange(monitor, newKey, newValChanged);
+    }
+
     #region Handlers
     protected void OnMonitorTransition(object sender, ServiceStatusTransition transition)
     {
@@ -224,6 +242,19 @@ namespace Hylasoft.Services.Tests
       Assert.IsNotNull(added = LastAdded.FirstOrDefault());
       Assert.AreEqual(added.Key, key);
       Assert.AreEqual(added.Value, value);
+    }
+
+    protected void AssertValueRemove(TestSetMonitor monitor, int key)
+    {
+      Assert.IsNotNull(monitor);
+      var initialStatus = monitor.Status;
+
+      var innerSet = monitor.InnerSet;
+      Assert.IsTrue(innerSet.ContainsKey(key));
+
+      innerSet.Remove(key);
+      monitor.WaitOnUpdate();
+      Assert.AreEqual(monitor.Status, initialStatus);
     }
 
     protected void AssertIsFailed(IMonitor monitor)

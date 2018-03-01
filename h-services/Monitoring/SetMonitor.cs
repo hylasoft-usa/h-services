@@ -160,7 +160,7 @@ namespace Hylasoft.Services.Monitoring
       try
       {
         var currentItems = items.Select(GetSpecification);
-        var missingItems = Set.Keys.Except(currentItems);
+        var missingItems = Set.Keys.Except(currentItems).ToArray();
 
         foreach (var missingItem in missingItems)
           Set.Remove(missingItem);
