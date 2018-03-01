@@ -9,5 +9,7 @@ namespace Hylasoft.Services.Interfaces
     event EventHandler<TItem> ItemChanged;
 
     event EventHandler<Collection<TItem>> ItemsAdded;
+
+    event EventHandler<Collection<TItem>> ItemsRemoved;
   }
 }

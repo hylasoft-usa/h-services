@@ -59,6 +59,8 @@ namespace Hylasoft.Services.Monitoring
     
     public event EventHandler<Collection<TItem>> ItemsAdded;
 
+    public event EventHandler<Collection<TItem>> ItemsRemoved;
+
     protected abstract Result FetchSet(out IEnumerable<TItem> items);
 
     protected abstract bool HasItemChanged(TItem oldItem, TItem newItem);
@@ -159,12 +161,18 @@ namespace Hylasoft.Services.Monitoring
     {
       try
       {
-        var currentItems = items.Select(GetSpecification);
-        var missingItems = Set.Keys.Except(currentItems).ToArray();
+        var itemArr = items.ToArray();
+        var currentItemSpecs = itemArr.Select(GetSpecification);
+        var missingItemSpecs = Set.Keys.Except(currentItemSpecs).ToArray();
 
-        foreach (var missingItem in missingItems)
-          Set.Remove(missingItem);
+        foreach (var missingItemSpec in missingItemSpecs)
+          Set.Remove(missingItemSpec);
 
+        var missingItems = itemArr
+          .Where(itms => missingItemSpecs
+            .Any(mitms => AreItemsEqual(GetSpecification(itms), mitms))); 
+
+        TriggerItemsRemoved(missingItems);
         return Result.Success;
       }
       catch (Exception e)
@@ -184,6 +192,13 @@ namespace Hylasoft.Services.Monitoring
       Collection<TItem> addedItems;
       if (ItemsAdded != null && items != null && (addedItems = items.ToCollection()).Any())
         ItemsAdded(this, addedItems);
+    }
+
+    private void TriggerItemsRemoved(IEnumerable<TItem> items)
+    {
+      Collection<TItem> removedItems;
+      if (ItemsRemoved != null && items != null && (removedItems = items.ToCollection()).Any())
+        ItemsRemoved(this, removedItems);
     }
     #endregion
   }
