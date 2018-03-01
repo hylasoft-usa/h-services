@@ -27,6 +27,7 @@ namespace Hylasoft.Services.Services
 
       Monitor.ItemChanged += OnItemChange;
       Monitor.ItemsAdded += OnItemsAdded;
+      Monitor.ItemsRemoved += OnItemsRemoved;
       return init;
     }
 
@@ -55,6 +56,8 @@ namespace Hylasoft.Services.Services
     protected abstract void OnItemChange(object sender, TItem changedItem);
 
     protected abstract void OnItemsAdded(object sender, Collection<TItem> newItems);
+
+    protected abstract void OnItemsRemoved(object send, Collection<TItem> removedItems);
 
     #endregion
   }

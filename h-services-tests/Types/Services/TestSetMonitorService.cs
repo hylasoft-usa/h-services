@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Services;
 using Hylasoft.Services.Tests.Types.MonitorSets;
@@ -12,13 +11,19 @@ namespace Hylasoft.Services.Tests.Types.Services
 
     public int ItemsAdded { get; private set; }
 
+    public int ItemsRemoved { get; private set; }
+
     public bool HasChanged { get; private set; }
 
     public bool HaveBeenAdded { get; private set; }
 
+    public bool HaveBeenRemoved { get; private set; }
+
     public TestMonitorItem ChangedItem { get; private set; }
 
     public Collection<TestMonitorItem> NewItems { get; private set; }
+
+    public Collection<TestMonitorItem> RemovedItems { get; private set; } 
 
     public TestSetMonitorService(TestSetMonitor monitor, IServiceValidator serviceValidator = null) : base(monitor, serviceValidator)
     {
@@ -34,7 +39,14 @@ namespace Hylasoft.Services.Tests.Types.Services
 
     public void AddItem(int key, string value)
     {
+      HaveBeenAdded = false;
       Monitor.InnerSet.Add(key, value);
+    }
+
+    public void RemoveItem(int key)
+    {
+      HaveBeenRemoved = false;
+      Monitor.InnerSet.Remove(key);
     }
 
     public void WaitOnUpdate()
@@ -55,6 +67,13 @@ namespace Hylasoft.Services.Tests.Types.Services
       NewItems = newItems;
       ++ItemsAdded;
       HaveBeenAdded = true;
+    }
+
+    protected override void OnItemsRemoved(object send, Collection<TestMonitorItem> removedItems)
+    {
+      RemovedItems = removedItems;
+      ++ItemsRemoved;
+      HaveBeenRemoved = true;
     }
   }
 }
