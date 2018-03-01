@@ -161,14 +161,18 @@ namespace Hylasoft.Services.Monitoring
     {
       try
       {
+        var originalItems = Set.Values.ToCollection();
         var itemArr = items.ToArray();
         var currentItemSpecs = itemArr.Select(GetSpecification);
         var missingItemSpecs = Set.Keys.Except(currentItemSpecs).ToArray();
 
+        if (!missingItemSpecs.Any())
+          return Result.Success;
+
         foreach (var missingItemSpec in missingItemSpecs)
           Set.Remove(missingItemSpec);
 
-        var missingItems = itemArr
+        var missingItems = originalItems
           .Where(itms => missingItemSpecs
             .Any(mitms => AreItemsEqual(GetSpecification(itms), mitms))); 
 

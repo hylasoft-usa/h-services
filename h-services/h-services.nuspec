@@ -8,9 +8,9 @@
     <owners>Hylasoft USA</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Adds set monitor add event.</releaseNotes>
+    <releaseNotes>Adds set monitor removed event.</releaseNotes>
     <copyright>Copyright 2018</copyright>
-    <tags>ErrorCollection</tags>
+    <tags>Service</tags>
     <dependencies>
       <dependency id="Hylasoft.Extensions" version="(0.1.9,)" />
       <dependency id="Hylasoft.Resolution" version="(0.1.3,)" />

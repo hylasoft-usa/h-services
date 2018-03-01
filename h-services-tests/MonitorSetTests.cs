@@ -18,13 +18,17 @@ namespace Hylasoft.Services.Tests
 
     protected TestMonitorItem LastChange { get; private set; }
 
-    protected Collection<TestMonitorItem> LastAdded { get; private set; } 
+    protected Collection<TestMonitorItem> LastAdded { get; private set; }
+
+    protected Collection<TestMonitorItem> LastRemoved { get; private set; } 
 
     protected int TransitionCount { get; private set; }
 
     protected int ChangeCount { get; private set; }
 
     protected int AddCount { get; private set; }
+
+    protected int RemovedCount { get; private set; }
 
     public MonitorSetTests()
     {
@@ -41,6 +45,12 @@ namespace Hylasoft.Services.Tests
       
       ChangeCount = 0;
       LastChange = null;
+
+      AddCount = 0;
+      LastAdded = null;
+
+      RemovedCount = 0;
+      LastRemoved = null;
     }
 
     [TestMethod]
@@ -214,6 +224,12 @@ namespace Hylasoft.Services.Tests
       LastAdded = newItems;
       ++AddCount;
     }
+
+    protected void OnItemsRemoved(object sender, Collection<TestMonitorItem> removedItems)
+    {
+      LastRemoved = removedItems;
+      ++RemovedCount;
+    }
     #endregion
 
     #region Helpers
@@ -248,6 +264,7 @@ namespace Hylasoft.Services.Tests
 
     protected void AssertValueRemove(TestSetMonitor monitor, int key)
     {
+      var rc = RemovedCount;
       Assert.IsNotNull(monitor);
       var initialStatus = monitor.Status;
 
@@ -257,6 +274,10 @@ namespace Hylasoft.Services.Tests
       innerSet.Remove(key);
       monitor.WaitOnUpdate();
       Assert.AreEqual(monitor.Status, initialStatus);
+      Assert.IsNotNull(LastRemoved);
+      Assert.AreEqual(LastRemoved.Count, 1);
+      Assert.AreEqual(LastRemoved.FirstOrDefault().Key, key);
+      Assert.AreEqual(RemovedCount, ++rc);
     }
 
     protected void AssertIsFailed(IMonitor monitor)
@@ -274,6 +295,7 @@ namespace Hylasoft.Services.Tests
       monitor.StatusChanged += OnMonitorTransition;
       monitor.ItemChanged += OnItemChanged;
       monitor.ItemsAdded += OnItemsAdded;
+      monitor.ItemsRemoved += OnItemsRemoved;
 
       return monitor;
     }
