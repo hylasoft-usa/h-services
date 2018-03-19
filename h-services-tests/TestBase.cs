@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Hylasoft.Logging;
 using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Providers;
 using Hylasoft.Services.Service;
@@ -61,9 +62,9 @@ namespace Hylasoft.Services.Tests
       return new HServiceProvider(serviceName, logger, services);
     }
 
-    protected ILogger BuildLogger()
+    protected IResultLogger BuildLogger()
     {
-      return new NullLogger();
+      return new NullLogger("TestLogger");
     }
 
     protected void AssertChangedValue(TestSetMonitorService service, int key, string value)

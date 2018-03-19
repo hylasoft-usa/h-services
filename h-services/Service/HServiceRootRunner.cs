@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Hylasoft.Extensions;
+using Hylasoft.Logging;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces;
 using Hylasoft.Services.Resources;
@@ -15,11 +16,11 @@ namespace Hylasoft.Services.Service
   {
     private readonly IHServicesProvider _provider;
     private readonly Collection<IHService> _services;
-    private readonly ILogger _logger;
+    private readonly IResultLogger _logger;
     
     protected Collection<IHService> Services { get { return _services; } }
 
-    protected ILogger Logger { get { return _logger; } }
+    protected IResultLogger Logger { get { return _logger; } }
 
     protected IHServicesProvider ServicesProvider { get { return _provider; } }
 

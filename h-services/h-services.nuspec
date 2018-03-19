@@ -8,12 +8,13 @@
     <owners>Hylasoft USA</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Adds set monitor removed event.</releaseNotes>
+    <releaseNotes>Incoporates h-logging.</releaseNotes>
     <copyright>Copyright 2018</copyright>
     <tags>Service</tags>
     <dependencies>
       <dependency id="Hylasoft.Extensions" version="(0.1.9,)" />
-      <dependency id="Hylasoft.Resolution" version="(0.1.3,)" />
+      <dependency id="Hylasoft.Resolution" version="(0.1.4,)" />
+      <dependency id="Hylasoft.Logging" version="(0.0.1,)" />
     </dependencies>
   </metadata>
 </package>

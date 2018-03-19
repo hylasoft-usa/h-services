@@ -40,9 +40,18 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Hylasoft.Extensions.0.1.10\lib\net45\Hylasoft.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="Hylasoft.Resolution, Version=0.1.4.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Hylasoft.Logging">
+      <HintPath>..\packages\Hylasoft.Logging.0.0.2\lib\net45\Hylasoft.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Hylasoft.Resolution, Version=0.1.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Hylasoft.Resolution.0.1.4\lib\net45\Hylasoft.Resolution.dll</HintPath>
+      <HintPath>..\packages\Hylasoft.Resolution.0.1.5\lib\net45\Hylasoft.Resolution.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>..\packages\NLog.4.4.13\lib\net45\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="OmniColour">
+      <HintPath>..\packages\OmniColour.0.0.2\lib\net45\OmniColour.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>

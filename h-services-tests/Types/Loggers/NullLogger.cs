@@ -1,12 +1,28 @@
-﻿using Hylasoft.Resolution;
-using Hylasoft.Services.Interfaces;
+﻿using Hylasoft.Logging;
+using Hylasoft.Resolution;
 
 namespace Hylasoft.Services.Tests.Types.Loggers
 {
-  public class NullLogger : ILogger
+  public class NullLogger : IResultLogger
   {
-    public void Log(Result result)
+    private readonly string _id;
+
+    public NullLogger(string id)
     {
+      _id = id;
     }
+
+
+    public Result Log(Result result)
+    {
+      return Result.Success;
+    }
+
+    public Result LogSynchronous(Result result)
+    {
+      return Result.Success;
+    }
+
+    public string Id { get { return _id; } }
   }
 }
