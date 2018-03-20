@@ -1,12 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces.Monitoring;
+using Hylasoft.Services.Interfaces.Services;
 using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Services.Base;
 
 namespace Hylasoft.Services.Services
 {
-  public abstract class MonitorSetService<TMonitor, TItem> : HService
+  public abstract class MonitorSetService<TMonitor, TItem> : HService, IMonitorSetService
     where TItem : class
     where TMonitor : class, ISetMonitor<TItem>
   {

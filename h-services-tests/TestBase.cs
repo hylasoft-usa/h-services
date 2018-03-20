@@ -4,6 +4,7 @@ using System.Linq;
 using Hylasoft.Logging;
 using Hylasoft.Services.Interfaces.Providers;
 using Hylasoft.Services.Interfaces.Services;
+using Hylasoft.Services.Interfaces.Services.Base;
 using Hylasoft.Services.Providers;
 using Hylasoft.Services.Service;
 using Hylasoft.Services.Tests.Types.Loggers;

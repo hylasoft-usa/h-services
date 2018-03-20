@@ -1,4 +1,4 @@
-﻿using Hylasoft.Services.Interfaces.Services;
+﻿using Hylasoft.Services.Interfaces.Services.Base;
 
 namespace Hylasoft.Services.Interfaces.Monitoring
 {

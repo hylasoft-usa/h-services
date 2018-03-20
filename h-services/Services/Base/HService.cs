@@ -1,6 +1,6 @@
 ﻿using System;
 using Hylasoft.Resolution;
-using Hylasoft.Services.Interfaces.Services;
+using Hylasoft.Services.Interfaces.Services.Base;
 using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Resources;
 

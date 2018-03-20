@@ -7,6 +7,7 @@ using Hylasoft.Logging;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces.Providers;
 using Hylasoft.Services.Interfaces.Services;
+using Hylasoft.Services.Interfaces.Services.Base;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Services.Base;
 using Hylasoft.Services.Types;

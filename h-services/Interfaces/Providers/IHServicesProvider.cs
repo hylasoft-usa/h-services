@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using Hylasoft.Logging;
-using Hylasoft.Services.Interfaces.Services;
+using Hylasoft.Services.Interfaces.Services.Base;
 
 namespace Hylasoft.Services.Interfaces.Providers
 {

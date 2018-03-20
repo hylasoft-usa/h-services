@@ -61,9 +61,10 @@
     <Compile Include="Interfaces\Services\IHServiceRootRunner.cs" />
     <Compile Include="Interfaces\Monitoring\IMonitor.cs" />
     <Compile Include="Interfaces\Configuration\IMonitoringConfig.cs" />
-    <Compile Include="Interfaces\Services\IHService.cs" />
+    <Compile Include="Interfaces\Services\Base\IHService.cs" />
     <Compile Include="Interfaces\Providers\IHServicesProvider.cs" />
-    <Compile Include="Interfaces\Services\IServiceStatusElement.cs" />
+    <Compile Include="Interfaces\Services\IMonitorSetService.cs" />
+    <Compile Include="Interfaces\Services\Base\IServiceStatusElement.cs" />
     <Compile Include="Interfaces\Validation\IServiceValidator.cs" />
     <Compile Include="Interfaces\Monitoring\ISetMonitor.cs" />
     <Compile Include="Monitoring\SetMonitor.cs" />
