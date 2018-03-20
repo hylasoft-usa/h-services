@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="MonitorSetServiceTests.cs" />
     <Compile Include="MonitorSetTests.cs" />
+    <Compile Include="NetworkSocketMonitorTests.cs" />
     <Compile Include="RootServiceTests.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -77,6 +78,11 @@
     <Compile Include="Types\MonitorSets\FailedSetMonitor.cs" />
     <Compile Include="Types\MonitorSets\TestMonitorItem.cs" />
     <Compile Include="Types\MonitorSets\TestSetMonitor.cs" />
+    <Compile Include="Types\NetworkMonitors\RequestTypes.cs" />
+    <Compile Include="Types\NetworkMonitors\ResponseTypes.cs" />
+    <Compile Include="Types\NetworkMonitors\TestNeworkMonitor.cs" />
+    <Compile Include="Types\NetworkMonitors\TestRequest.cs" />
+    <Compile Include="Types\NetworkMonitors\TestResponse.cs" />
     <Compile Include="Types\Services\TestSetMonitorService.cs" />
   </ItemGroup>
   <ItemGroup>

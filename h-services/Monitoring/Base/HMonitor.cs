@@ -81,6 +81,18 @@ namespace Hylasoft.Services.Monitoring.Base
     {
       if (!error) TriggerErrorOccured(error);
     }
+
+    protected Result ExecServiceLoop()
+    {
+      try
+      {
+        return PerformServiceLoop();
+      }
+      catch (Exception e)
+      {
+        return Result.Error(e);
+      }
+    }
     #endregion
 
     #region Abstract Members
@@ -99,14 +111,14 @@ namespace Hylasoft.Services.Monitoring.Base
 
       Result loop;
       // Run loop once, to verify it can.
-      if (!(loop = PerformServiceLoop()))
+      if (!(loop = ExecServiceLoop()))
         ErrorOut(loop);
 
       SetRunning(LastTransitionReason);
       while (IsRunning || IsPaused)
       {
         // TODO: Consider a re-try mechanism.
-        if (IsRunning && !(loop = PerformServiceLoop()))
+        if (IsRunning && !(loop = ExecServiceLoop()))
           ErrorOut(loop);
 
         Thread.Sleep(Config.MonitorSleepInMilliseconds);
