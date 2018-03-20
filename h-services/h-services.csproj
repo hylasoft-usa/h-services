@@ -65,6 +65,7 @@
     <Compile Include="Interfaces\Providers\IHServicesProvider.cs" />
     <Compile Include="Interfaces\Services\IMonitorSetService.cs" />
     <Compile Include="Interfaces\Services\Base\IServiceStatusElement.cs" />
+    <Compile Include="Interfaces\Services\INetworkSocketService.cs" />
     <Compile Include="Interfaces\Validation\IServiceValidator.cs" />
     <Compile Include="Interfaces\Monitoring\ISetMonitor.cs" />
     <Compile Include="Monitoring\SetMonitor.cs" />
@@ -92,14 +93,19 @@
     </Compile>
     <Compile Include="Services\Base\HService.cs" />
     <Compile Include="Services\MonitorSetService.cs" />
+    <Compile Include="Services\NetworkSocketService.cs" />
     <Compile Include="Service\HServiceRoot.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Monitoring\Base\HMonitor.cs" />
     <Compile Include="Services\Base\HServiceStatusBase.cs" />
     <Compile Include="Service\HServiceRootRunner.cs" />
+    <Compile Include="Types\NetworkResult.cs" />
+    <Compile Include="Types\NetworkResultIssue.cs" />
     <Compile Include="Types\ServiceStatuses.cs" />
     <Compile Include="Types\ServiceStatusTransition.cs" />
+    <Compile Include="Types\SocketRequest.cs" />
+    <Compile Include="Types\SocketResponse.cs" />
     <Compile Include="Utilities\ItemSetComparer.cs" />
     <Compile Include="Validation\ServiceValidator.cs" />
   </ItemGroup>
