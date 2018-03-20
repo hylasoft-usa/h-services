@@ -2,7 +2,7 @@
 
 namespace Hylasoft.Services.Configuration
 {
-  public class DefaultMonitoringConfig : IMonitoringConfig
+  internal class DefaultMonitoringConfig : IMonitoringConfig
   {
     public int AbortTimeoutInSeconds { get { return 45; }}
 
