@@ -1,4 +1,4 @@
-﻿namespace Hylasoft.Services.Interfaces
+﻿namespace Hylasoft.Services.Interfaces.Configuration
 {
 	public interface IMonitoringConfig
 	{

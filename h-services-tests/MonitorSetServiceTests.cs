@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Threading;
 using Hylasoft.Services.Tests.Types.MonitorSets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

@@ -1,4 +1,4 @@
-﻿namespace Hylasoft.Services.Interfaces
+﻿namespace Hylasoft.Services.Interfaces.Services
 {
   public interface IHServiceRootRunner
   {

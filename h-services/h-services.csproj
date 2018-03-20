@@ -58,14 +58,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\DefaultMonitoringConfig.cs" />
-    <Compile Include="Interfaces\IHServiceRootRunner.cs" />
-    <Compile Include="Interfaces\IMonitor.cs" />
-    <Compile Include="Interfaces\IMonitoringConfig.cs" />
-    <Compile Include="Interfaces\IHService.cs" />
-    <Compile Include="Interfaces\IHServicesProvider.cs" />
-    <Compile Include="Interfaces\IServiceStatusElement.cs" />
-    <Compile Include="Interfaces\IServiceValidator.cs" />
-    <Compile Include="Interfaces\ISetMonitor.cs" />
+    <Compile Include="Interfaces\Services\IHServiceRootRunner.cs" />
+    <Compile Include="Interfaces\Monitoring\IMonitor.cs" />
+    <Compile Include="Interfaces\Configuration\IMonitoringConfig.cs" />
+    <Compile Include="Interfaces\Services\IHService.cs" />
+    <Compile Include="Interfaces\Providers\IHServicesProvider.cs" />
+    <Compile Include="Interfaces\Services\IServiceStatusElement.cs" />
+    <Compile Include="Interfaces\Validation\IServiceValidator.cs" />
+    <Compile Include="Interfaces\Monitoring\ISetMonitor.cs" />
     <Compile Include="Monitoring\SetMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\HServiceProvider.cs" />

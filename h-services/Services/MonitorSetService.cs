@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using Hylasoft.Resolution;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Interfaces.Monitoring;
+using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Services.Base;
 
 namespace Hylasoft.Services.Services

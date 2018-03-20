@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using Hylasoft.Extensions;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Types;
 
 namespace Hylasoft.Services.Validation

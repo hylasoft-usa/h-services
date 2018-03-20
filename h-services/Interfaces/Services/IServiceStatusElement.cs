@@ -2,7 +2,7 @@
 using Hylasoft.Resolution;
 using Hylasoft.Services.Types;
 
-namespace Hylasoft.Services.Interfaces
+namespace Hylasoft.Services.Interfaces.Services
 {
   public interface IServiceStatusElement
   {

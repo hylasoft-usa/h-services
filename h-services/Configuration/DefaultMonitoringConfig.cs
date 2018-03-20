@@ -1,4 +1,4 @@
-﻿using Hylasoft.Services.Interfaces;
+﻿using Hylasoft.Services.Interfaces.Configuration;
 
 namespace Hylasoft.Services.Configuration
 {

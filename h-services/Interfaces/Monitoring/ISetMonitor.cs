@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 
-namespace Hylasoft.Services.Interfaces
+namespace Hylasoft.Services.Interfaces.Monitoring
 {
   public interface ISetMonitor<TItem> : IMonitor
     where TItem : class

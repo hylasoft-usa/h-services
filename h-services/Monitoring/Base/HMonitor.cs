@@ -2,7 +2,9 @@
 using System.Threading;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Configuration;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Interfaces.Configuration;
+using Hylasoft.Services.Interfaces.Monitoring;
+using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Services.Base;
 using Hylasoft.Services.Types;

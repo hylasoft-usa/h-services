@@ -2,7 +2,8 @@
 using System.Collections.ObjectModel;
 using Hylasoft.Extensions;
 using Hylasoft.Logging;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Interfaces.Providers;
+using Hylasoft.Services.Interfaces.Services;
 
 namespace Hylasoft.Services.Providers
 {
