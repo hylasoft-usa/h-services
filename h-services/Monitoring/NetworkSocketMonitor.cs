@@ -16,10 +16,10 @@ using Hylasoft.Services.Types;
 namespace Hylasoft.Services.Monitoring
 {
   public abstract class NetworkSocketMonitor<TRequest, TRequestTypes, TResponse, TResponseTypes> : HMonitor, INetworkSocketMonitor<TRequest, TRequestTypes, TResponse, TResponseTypes>
-    where TRequest : class, new()
     where TRequestTypes : struct, IConvertible
-    where TResponse : class, new()
+    where TRequest : SocketPayload<TRequestTypes>, new()
     where TResponseTypes : struct, IConvertible
+    where TResponse : SocketPayload<TResponseTypes>, new()
   {
     private readonly INetworkSocketConfig _config;
     private Socket _socket;
@@ -395,7 +395,7 @@ namespace Hylasoft.Services.Monitoring
       if (!(build += GetRequestType(requestObj, out type)))
         return build;
 
-      request = new SocketRequest<TRequest, TRequestTypes>(requestObj, type)
+      request = new SocketRequest<TRequest, TRequestTypes>(requestObj)
       {
         RequestHandler = requestHandler
       };

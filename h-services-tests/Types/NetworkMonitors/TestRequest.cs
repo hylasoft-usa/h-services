@@ -1,6 +1,8 @@
-﻿namespace Hylasoft.Services.Tests.Types.NetworkMonitors
+﻿using Hylasoft.Services.Types;
+
+namespace Hylasoft.Services.Tests.Types.NetworkMonitors
 {
-  public class TestRequest
+  public class TestRequest : SocketPayload<RequestTypes>
   {
   }
 }

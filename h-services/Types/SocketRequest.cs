@@ -7,14 +7,11 @@ namespace Hylasoft.Services.Types
   [Serializable]
   [XmlRoot(ElementName = "SocketRequest")]
   public class SocketRequest<TRequest, TRequestTypes>
-    where TRequest : class, new()
     where TRequestTypes : struct, IConvertible
+    where TRequest : SocketPayload<TRequestTypes>, new()
   {
     [XmlElement(ElementName = "Request")]
     public TRequest Request { get; set; }
-
-    [XmlElement(ElementName = "Type")]
-    public TRequestTypes Type { get; set; }
 
     [XmlIgnore]
     internal Socket RequestHandler { get; set; }
@@ -23,10 +20,9 @@ namespace Hylasoft.Services.Types
     {
     }
 
-    public SocketRequest(TRequest request, TRequestTypes type)
+    public SocketRequest(TRequest request)
     {
       Request = request;
-      Type = type;
     }
   }
 }
