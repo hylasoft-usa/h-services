@@ -57,9 +57,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Clients\SocketMonitorClient.cs" />
     <Compile Include="Configuration\DefaultMonitoringConfig.cs" />
     <Compile Include="Configuration\DefaultNetworkSocketingConfig.cs" />
     <Compile Include="Constants\ServiceValues.cs" />
+    <Compile Include="Interfaces\Clients\ISocketMonitorClient.cs" />
     <Compile Include="Interfaces\Configuration\INetworkSocketConfig.cs" />
     <Compile Include="Interfaces\Monitoring\INetworkSocketMonitor.cs" />
     <Compile Include="Interfaces\Services\IHServiceRootRunner.cs" />
@@ -70,6 +72,8 @@
     <Compile Include="Interfaces\Services\IMonitorSetService.cs" />
     <Compile Include="Interfaces\Services\Base\IServiceStatusElement.cs" />
     <Compile Include="Interfaces\Services\INetworkSocketService.cs" />
+    <Compile Include="Interfaces\Utilities\INetworkParser.cs" />
+    <Compile Include="Interfaces\Utilities\ISocketPayloadSerializer.cs" />
     <Compile Include="Interfaces\Validation\IServiceValidator.cs" />
     <Compile Include="Interfaces\Monitoring\ISetMonitor.cs" />
     <Compile Include="Monitoring\NetworkSocketMonitor.cs" />
@@ -119,6 +123,7 @@
     <Compile Include="Types\SocketRequest.cs" />
     <Compile Include="Types\SocketResponse.cs" />
     <Compile Include="Utilities\ItemSetComparer.cs" />
+    <Compile Include="Utilities\NetworkParser.cs" />
     <Compile Include="Utilities\SocketPayloadSerializer.cs" />
     <Compile Include="Validation\ServiceValidator.cs" />
   </ItemGroup>

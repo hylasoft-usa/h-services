@@ -4,11 +4,12 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using Hylasoft.Resolution;
+using Hylasoft.Services.Interfaces.Utilities;
 using Hylasoft.Services.Types;
 
 namespace Hylasoft.Services.Utilities
 {
-  public class SocketPayloadSerializer
+  public class SocketPayloadSerializer : ISocketPayloadSerializer
   {
     public Result Serialize<TPayload, TPayloadTypes>(TPayload payload, out string data)
       where TPayloadTypes : struct, IConvertible

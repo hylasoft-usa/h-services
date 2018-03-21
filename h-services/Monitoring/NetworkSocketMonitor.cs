@@ -9,11 +9,11 @@ using Hylasoft.Services.Configuration;
 using Hylasoft.Services.Constants;
 using Hylasoft.Services.Interfaces.Configuration;
 using Hylasoft.Services.Interfaces.Monitoring;
+using Hylasoft.Services.Interfaces.Utilities;
 using Hylasoft.Services.Monitoring.Base;
 using Hylasoft.Services.Monitoring.Types;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Types;
-using Hylasoft.Services.Utilities;
 
 namespace Hylasoft.Services.Monitoring
 {
@@ -24,10 +24,11 @@ namespace Hylasoft.Services.Monitoring
     where TResponse : SocketResponse<TResponseTypes>, new()
   {
     private readonly INetworkSocketConfig _config;
+    private readonly INetworkParser _netParser;
     private Socket _socket;
     private EndPoint _endpoint;
     private readonly ManualResetEvent _accepted;
-    private readonly SocketPayloadSerializer _payloadSerializer;
+    private readonly ISocketPayloadSerializer _payloadSerializer;
 
     protected INetworkSocketConfig NetworkConfig { get { return _config; } }
 
@@ -37,13 +38,16 @@ namespace Hylasoft.Services.Monitoring
 
     protected ManualResetEvent Accepted { get { return _accepted; } }
 
-    protected SocketPayloadSerializer PayloadSerializer { get { return _payloadSerializer; } }
+    protected ISocketPayloadSerializer PayloadSerializer { get { return _payloadSerializer; } }
 
-    protected NetworkSocketMonitor(INetworkSocketConfig config)
+    protected INetworkParser NetParser { get { return _netParser; } }
+
+    protected NetworkSocketMonitor(INetworkSocketConfig config, INetworkParser netParser, ISocketPayloadSerializer payloadSerializer)
     {
+      _netParser = netParser;
+      _payloadSerializer = payloadSerializer;
       _config = config ?? new DefaultNetworkSocketingConfig();
       _accepted = new ManualResetEvent(false);
-      _payloadSerializer = new SocketPayloadSerializer();
 
       Handler = NoHandler;
     }
@@ -56,11 +60,7 @@ namespace Hylasoft.Services.Monitoring
       if (!(init = UnbindSocket()))
         return init;
 
-      // Build both socket and endpoint.
-      if (!(init += BuildSocket(out _socket)))
-        return init;
-
-      return init + BuildEndpoint(out _endpoint);
+      return init + NetParser.BuildNetworkBindings(NetworkConfig, out _socket, out _endpoint);
     }
 
     protected override Result StartService()
@@ -123,69 +123,6 @@ namespace Hylasoft.Services.Monitoring
     {
       response = new TResponse();
       return Result.SingleError(Errors.NoHandlerDefinedForSocketMonitor);
-    }
-    #endregion
-
-    #region Connection Building
-    protected Result BuildSocket(out Socket socket)
-    {
-      socket = null;
-
-      try
-      {
-        var addressFamily = GetAddressFamily();
-        var socketType = GetSocketType();
-        var protocolType = GetProtocolType();
-
-        socket = new Socket(addressFamily, socketType, protocolType);
-        return Result.Success;
-      }
-      catch (Exception e)
-      {
-        return Result.Error(e);
-      }
-    }
-
-    protected Result BuildEndpoint(out EndPoint endpoint)
-    {
-      endpoint = null;
-
-      try
-      {
-        var hostEntry = Dns.GetHostEntry(NetworkConfig.HostName);
-
-        IPAddress address;
-        if ((address = hostEntry.AddressList.FirstOrDefault(IsAddressMatch)) == null)
-          return Result.SingleError(Errors.NetworkSocketAddressNotFound, NetworkConfig.Address, NetworkConfig.HostName);
-
-        endpoint = new IPEndPoint(address, (int)NetworkConfig.Port);
-        return Result.Success;
-      }
-      catch (Exception e)
-      {
-        return Result.Error(e);
-      }
-    }
-
-    protected AddressFamily GetAddressFamily()
-    {
-      return AddressFamily.InterNetwork;
-    }
-
-    protected SocketType GetSocketType()
-    {
-      return SocketType.Stream;
-    }
-
-    protected ProtocolType GetProtocolType()
-    {
-      return ProtocolType.Tcp;
-    }
-
-    protected bool IsAddressMatch(IPAddress address)
-    {
-      return address != null
-             && address.AddressFamily == GetAddressFamily();
     }
     #endregion
 
