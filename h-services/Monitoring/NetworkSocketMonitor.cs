@@ -12,6 +12,7 @@ using Hylasoft.Services.Interfaces.Monitoring;
 using Hylasoft.Services.Monitoring.Base;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Types;
+using Hylasoft.Services.Utilities;
 
 namespace Hylasoft.Services.Monitoring
 {
@@ -25,6 +26,7 @@ namespace Hylasoft.Services.Monitoring
     private Socket _socket;
     private EndPoint _endpoint;
     private readonly ManualResetEvent _accepted;
+    private readonly SocketPayloadSerializer _payloadSerializer;
 
     protected INetworkSocketConfig NetworkConfig { get { return _config; } }
 
@@ -34,10 +36,13 @@ namespace Hylasoft.Services.Monitoring
 
     protected ManualResetEvent Accepted { get { return _accepted; } }
 
+    protected SocketPayloadSerializer PayloadSerializer { get { return _payloadSerializer; } }
+
     protected NetworkSocketMonitor(INetworkSocketConfig config)
     {
       _config = config ?? new DefaultNetworkSocketingConfig();
       _accepted = new ManualResetEvent(false);
+      _payloadSerializer = new SocketPayloadSerializer();
     }
 
     #region HMonitor Implementation
@@ -406,7 +411,10 @@ namespace Hylasoft.Services.Monitoring
 
     #region Abstract Methods
     // TODO: Implement this via .Net Serialization.
-    protected abstract Result BuildRequest(string message, out TRequest request);
+    protected virtual Result BuildRequest(string message, out TRequest request)
+    {
+      return PayloadSerializer.Deserialize<TRequest, TRequestTypes>(message, out request);
+    }
 
     protected abstract Result GetRequestType(TRequest request, out TRequestTypes type);
     #endregion

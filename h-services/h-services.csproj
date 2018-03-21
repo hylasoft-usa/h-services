@@ -118,7 +118,7 @@
     <Compile Include="Types\SocketRequest.cs" />
     <Compile Include="Types\SocketResponse.cs" />
     <Compile Include="Utilities\ItemSetComparer.cs" />
-    <Compile Include="Utilities\SocketMessageSerializer.cs" />
+    <Compile Include="Utilities\SocketPayloadSerializer.cs" />
     <Compile Include="Validation\ServiceValidator.cs" />
   </ItemGroup>
   <ItemGroup>
