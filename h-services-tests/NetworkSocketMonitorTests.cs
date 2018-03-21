@@ -21,5 +21,15 @@ namespace Hylasoft.Services.Tests
       Assert.IsTrue(monitor.Start());
       Assert.IsTrue(monitor.Stop());
     }
+
+    [TestMethod]
+    public void TestNetworkMonitorRestart()
+    {
+      var monitor = new TestNeworkMonitor();
+      Assert.IsTrue(monitor.Start());
+      Assert.IsTrue(monitor.Stop());
+      Assert.IsTrue(monitor.Start());
+      Assert.IsTrue(monitor.Stop());
+    }
   }
 }

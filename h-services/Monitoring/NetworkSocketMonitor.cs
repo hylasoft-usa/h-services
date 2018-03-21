@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Configuration;
 using Hylasoft.Services.Interfaces.Configuration;
@@ -21,6 +22,7 @@ namespace Hylasoft.Services.Monitoring
     private readonly INetworkSocketConfig _config;
     private Socket _socket;
     private EndPoint _endpoint;
+    private readonly ManualResetEvent _accepted;
 
     protected INetworkSocketConfig NetworkConfig { get { return _config; } }
 
@@ -28,9 +30,12 @@ namespace Hylasoft.Services.Monitoring
 
     protected EndPoint ConnectionEndpoint { get { return _endpoint; } }
 
+    protected ManualResetEvent Accepted { get { return _accepted; } }
+
     protected NetworkSocketMonitor(INetworkSocketConfig config)
     {
       _config = config ?? new DefaultNetworkSocketingConfig();
+      _accepted = new ManualResetEvent(false);
     }
 
     #region HMonitor Implementation
@@ -52,11 +57,15 @@ namespace Hylasoft.Services.Monitoring
     {
       try
       {
+        Result init;
+        if (!(init = OnInitialize()))
+          return init;
+
         if (ConnectionSocket == null)
-          return Result.SingleFatal(Fatals.NetworkSocketServiceStartedWithoutSocket, ServiceName);
+          return init + Result.SingleFatal(Fatals.NetworkSocketServiceStartedWithoutSocket, ServiceName);
 
         if (ConnectionEndpoint == null)
-          return Result.SingleFatal(Fatals.NetworkSocketServiceStartedWithoutEndpoint, ServiceName);
+          return init + Result.SingleFatal(Fatals.NetworkSocketServiceStartedWithoutEndpoint, ServiceName);
 
         ConnectionSocket.Bind(ConnectionEndpoint);
         ConnectionSocket.Listen(NetworkConfig.MaxConnections);
@@ -69,9 +78,26 @@ namespace Hylasoft.Services.Monitoring
       }
     }
 
+    protected override Result StopService()
+    {
+      try
+      {
+        UnbindSocket();
+        return base.StopService();
+      }
+      catch (Exception e)
+      {
+        return Result.Error(e);
+      }
+    }
+
     protected override Result PerformServiceLoop()
     {
-      throw new NotImplementedException();
+      Accepted.Reset();
+      ConnectionSocket.BeginAccept(HandleConnection, ConnectionSocket);
+
+      Accepted.WaitOne();
+      return Result.Success;
     }
 
     protected override Result CleanupOnShutdown()
@@ -170,11 +196,12 @@ namespace Hylasoft.Services.Monitoring
         if (!IsBound)
           return Result.Success;
 
-        ConnectionSocket.Shutdown(SocketShutdown.Both);
-        ConnectionSocket.Disconnect(false);
-        ConnectionSocket.Dispose();
+        Result unbind;
+        if (!(unbind = CloseConnections()))
+          return unbind;
 
-        return Result.Success;
+        ConnectionSocket.Close(NetworkConfig.CloseConnectionTimeout);
+        return unbind;
       }
       catch (Exception e)
       {
@@ -189,12 +216,37 @@ namespace Hylasoft.Services.Monitoring
         if (!IsConnected)
           return Result.Success;
 
-        ConnectionSocket.Close(NetworkConfig.CloseConnectionTimeout);
+        ConnectionSocket.Shutdown(SocketShutdown.Both);
         return Result.Success;
       }
       catch (Exception e)
       {
         return Result.Error(e);
+      }
+    }
+    #endregion
+
+    #region Listening
+    protected void HandleConnection(IAsyncResult result)
+    {
+      try
+      {
+        Accepted.Set();
+
+        Socket listener, handler;
+        if (result == null
+            || (listener = result.AsyncState as Socket) == null
+            || (handler = listener.EndAccept(result)) == null)
+          return;
+      }
+      catch (ObjectDisposedException)
+      {
+        // Exit gracefully in the event of a shutdown.
+        return;
+      }
+      catch (Exception e)
+      {
+        ErrorOut(e);
       }
     }
     #endregion

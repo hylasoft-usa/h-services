@@ -151,8 +151,9 @@ namespace Hylasoft.Services.Tests
       AssertIsFailed(failMonitor);
 
       Assert.IsFalse(failMonitor.Start());
-      // + Starting, Failed
-      Assert.AreEqual(TransitionCount, transCount += 2);
+      failMonitor.WaitOnUpdate();
+      // + Starting, Started, Failed
+      Assert.AreEqual(TransitionCount, transCount += 3);
       AssertIsFailed(failMonitor);
 
       failMonitor.ShouldFail = false;
