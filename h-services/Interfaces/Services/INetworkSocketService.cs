@@ -10,8 +10,5 @@ namespace Hylasoft.Services.Interfaces.Services
     where TResponseTypes : struct, IConvertible
     where TResponse : SocketPayload<TResponseTypes>, new()
   {
-    event EventHandler<SocketRequest<TRequest, TRequestTypes>> RequestReceived;
-
-    Result SendResponse(SocketResponse<TResponse, TResponseTypes> response);
   }
 }

@@ -2,7 +2,7 @@
 
 namespace Hylasoft.Services.Tests.Types.NetworkMonitors
 {
-  public class TestResponse : SocketPayload<ResponseTypes>
+  public class TestResponse : SocketResponse<ResponseTypes>
   {
   }
 }

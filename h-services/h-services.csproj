@@ -74,6 +74,7 @@
     <Compile Include="Interfaces\Monitoring\ISetMonitor.cs" />
     <Compile Include="Monitoring\NetworkSocketMonitor.cs" />
     <Compile Include="Monitoring\SetMonitor.cs" />
+    <Compile Include="Monitoring\Types\NetworkSocketHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\HServiceProvider.cs" />
     <Compile Include="Resources\Debugs.Designer.cs">

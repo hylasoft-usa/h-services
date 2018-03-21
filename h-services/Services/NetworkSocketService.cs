@@ -45,14 +45,5 @@ namespace Hylasoft.Services.Services
       throw new NotImplementedException();
     }
     #endregion
-
-    #region INetworkSocketService Implementation
-    public event EventHandler<SocketRequest<TRequest, TRequestTypes>> RequestReceived;
-
-    public Result SendResponse(SocketResponse<TResponse, TResponseTypes> response)
-    {
-      throw new NotImplementedException();
-    }
-    #endregion
   }
 }

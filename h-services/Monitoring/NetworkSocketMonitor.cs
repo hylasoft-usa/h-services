@@ -10,6 +10,7 @@ using Hylasoft.Services.Constants;
 using Hylasoft.Services.Interfaces.Configuration;
 using Hylasoft.Services.Interfaces.Monitoring;
 using Hylasoft.Services.Monitoring.Base;
+using Hylasoft.Services.Monitoring.Types;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Types;
 using Hylasoft.Services.Utilities;
@@ -18,9 +19,9 @@ namespace Hylasoft.Services.Monitoring
 {
   public abstract class NetworkSocketMonitor<TRequest, TRequestTypes, TResponse, TResponseTypes> : HMonitor, INetworkSocketMonitor<TRequest, TRequestTypes, TResponse, TResponseTypes>
     where TRequestTypes : struct, IConvertible
-    where TRequest : SocketPayload<TRequestTypes>, new()
+    where TRequest : SocketRequest<TRequestTypes>, new()
     where TResponseTypes : struct, IConvertible
-    where TResponse : SocketPayload<TResponseTypes>, new()
+    where TResponse : SocketResponse<TResponseTypes>, new()
   {
     private readonly INetworkSocketConfig _config;
     private Socket _socket;
@@ -43,6 +44,8 @@ namespace Hylasoft.Services.Monitoring
       _config = config ?? new DefaultNetworkSocketingConfig();
       _accepted = new ManualResetEvent(false);
       _payloadSerializer = new SocketPayloadSerializer();
+
+      Handler = NoHandler;
     }
 
     #region HMonitor Implementation
@@ -114,17 +117,12 @@ namespace Hylasoft.Services.Monitoring
     #endregion
 
     #region INetworkSocketMonitor Implementation
-    public event EventHandler<SocketRequest<TRequest, TRequestTypes>> RequestReceived;
-    
-    public Result SendResponse(SocketResponse<TResponse, TResponseTypes> response)
-    {
-      throw new NotImplementedException();
-    }
+    public NetworkSocketHandler<TRequest, TRequestTypes, TResponse, TResponseTypes> Handler { set; protected get; }
 
-    protected void TriggerRequestReceived(SocketRequest<TRequest, TRequestTypes> request)
+    protected Result NoHandler(TRequest request, out TResponse response)
     {
-      if (RequestReceived != null)
-        RequestReceived(this, request);
+      response = new TResponse();
+      return Result.SingleError(Errors.NoHandlerDefinedForSocketMonitor);
     }
     #endregion
 
@@ -314,6 +312,21 @@ namespace Hylasoft.Services.Monitoring
         var message = Message.ToString();
         return message.Substring(0, message.IndexOf(EofTerminator, StringComparison.Ordinal));
       }
+
+      public Result Send(string message)
+      {
+        try
+        {
+          var data = Encoding.ASCII.GetBytes(string.Format("{0}{1}", message, EofTerminator));
+          Handler.BeginSend(data, 0, data.Length, SocketFlags.None, SocketMonitor.Terminate, this);
+
+          return Result.Success;
+        }
+        catch (Exception e)
+        {
+          return Result.Error(e);
+        }
+      }
     }
     #endregion
 
@@ -340,7 +353,6 @@ namespace Hylasoft.Services.Monitoring
       catch (ObjectDisposedException)
       {
         // Exit gracefully in the event of a shutdown.
-        return;
       }
       catch (Exception e)
       {
@@ -348,7 +360,7 @@ namespace Hylasoft.Services.Monitoring
       }
     }
 
-    internal void Receive(IAsyncResult result)
+    protected void Receive(IAsyncResult result)
     {
       try
       {
@@ -361,7 +373,7 @@ namespace Hylasoft.Services.Monitoring
         // Try to read more of the message.
         if (!(receive = state.Read(result, out done)))
         {
-          ErrorOut(receive);
+          Send(state, receive);
           return;
         }
 
@@ -372,14 +384,16 @@ namespace Hylasoft.Services.Monitoring
           return;
         }
 
-        SocketRequest<TRequest, TRequestTypes> request;
-        if (!(receive += BuildRequest(state.Handler, state.Parse(), out request)))
+        TRequest request;
+        if (!(receive += BuildRequest(state.Parse(), out request)))
         {
-          ErrorOut(receive);
+          Send(state, receive);
           return;
         }
 
-        TriggerRequestReceived(request);
+        TResponse response;
+        receive += Handler(request, out response);
+        Send(state, receive, response);
       }
       catch (Exception e)
       {
@@ -387,36 +401,51 @@ namespace Hylasoft.Services.Monitoring
       }
     }
 
-    Result BuildRequest(Socket requestHandler, string message, out SocketRequest<TRequest, TRequestTypes> request)
+    protected void Send(ReadState state, Result result, TResponse baseResponse = null)
     {
-      request = null;
+      result = result ?? Result.Success;
 
-      Result build;
-      TRequest requestObj;
-      if (!(build = BuildRequest(message, out requestObj)))
-        return build;
-
-      TRequestTypes type;
-      if (!(build += GetRequestType(requestObj, out type)))
-        return build;
-
-      request = new SocketRequest<TRequest, TRequestTypes>(requestObj)
+      try
       {
-        RequestHandler = requestHandler
-      };
+        string data;
+        TResponse response;
+        if (result.Any(i => i.Level >= ResultIssueLevels.Fatal)
+            || (response = PackResponse(result, baseResponse)) == null
+            || !(result += PayloadSerializer.Serialize<TResponse, TResponseTypes>(response, out data))
+            || !state.Send(data))
+          ErrorOut(result);
+      }
+      catch (Exception e)
+      {
+        ErrorOut(result + Result.Error(e));
+      }
+    }
 
-      return build;
+    protected void Terminate(IAsyncResult result)
+    {
+      Socket handler;
+      if ((handler = result.AsyncState as Socket) == null)
+        return;
+
+      handler.EndSend(result);
+      handler.Shutdown(SocketShutdown.Both);
+      handler.Close();
+    }
+
+    protected TResponse PackResponse(Result result, TResponse baseResponse = null)
+    {
+      var response = baseResponse ?? new TResponse();
+      response.Result = NetworkResult.FromResult(result);
+
+      return response;
     }
     #endregion
 
     #region Abstract Methods
-    // TODO: Implement this via .Net Serialization.
     protected virtual Result BuildRequest(string message, out TRequest request)
     {
       return PayloadSerializer.Deserialize<TRequest, TRequestTypes>(message, out request);
     }
-
-    protected abstract Result GetRequestType(TRequest request, out TRequestTypes type);
     #endregion
   }
 }

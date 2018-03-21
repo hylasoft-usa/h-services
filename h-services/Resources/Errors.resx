@@ -126,6 +126,9 @@
   <data name="NetworkSocketAddressNotFound" xml:space="preserve">
     <value>Could not find Address '{0}' in Server '{1}'.</value>
   </data>
+  <data name="NoHandlerDefinedForSocketMonitor" xml:space="preserve">
+    <value>No handler was defined for this endpoint.</value>
+  </data>
   <data name="ScheduleNullError" xml:space="preserve">
     <value>Provided schedule was null.</value>
   </data>

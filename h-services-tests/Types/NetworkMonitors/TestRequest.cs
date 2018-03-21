@@ -6,7 +6,7 @@ namespace Hylasoft.Services.Tests.Types.NetworkMonitors
 {
   [Serializable]
   [XmlType(TypeName = "Request")]
-  public class TestRequest : SocketPayload<RequestTypes>
+  public class TestRequest : SocketRequest<RequestTypes>
   {
 
     [XmlElement(ElementName = "Int")]

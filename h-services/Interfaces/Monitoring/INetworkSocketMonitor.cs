@@ -1,17 +1,15 @@
 ﻿using System;
-using Hylasoft.Resolution;
+using Hylasoft.Services.Monitoring.Types;
 using Hylasoft.Services.Types;
 
 namespace Hylasoft.Services.Interfaces.Monitoring
 {
-  public interface INetworkSocketMonitor<TRequest, TRequestTypes, TResponse, TResponseTypes>
+  public interface INetworkSocketMonitor<out TRequest, TRequestTypes, TResponse, TResponseTypes>
     where TRequestTypes : struct, IConvertible
-    where TRequest : SocketPayload<TRequestTypes>, new()
+    where TRequest : SocketRequest<TRequestTypes>, new()
     where TResponseTypes : struct, IConvertible
-    where TResponse : SocketPayload<TResponseTypes>, new()
+    where TResponse : SocketResponse<TResponseTypes>, new()
   {
-    event EventHandler<SocketRequest<TRequest, TRequestTypes>> RequestReceived;
-
-    Result SendResponse(SocketResponse<TResponse, TResponseTypes> response);
+    NetworkSocketHandler<TRequest, TRequestTypes, TResponse, TResponseTypes> Handler { set; }
   }
 }

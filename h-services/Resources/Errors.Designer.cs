@@ -88,6 +88,15 @@ namespace Hylasoft.Services.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No handler was defined for this endpoint..
+        /// </summary>
+        internal static string NoHandlerDefinedForSocketMonitor {
+            get {
+                return ResourceManager.GetString("NoHandlerDefinedForSocketMonitor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Provided schedule was null..
         /// </summary>
         internal static string ScheduleNullError {
