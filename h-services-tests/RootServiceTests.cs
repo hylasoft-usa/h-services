@@ -1,11 +1,12 @@
-﻿using Hylasoft.Services.Tests.Types.MonitorSets;
+﻿using Hylasoft.Services.Tests.Base;
+using Hylasoft.Services.Tests.Types.MonitorSets;
 using Hylasoft.Services.Tests.Types.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Hylasoft.Services.Tests
 {
   [TestClass]
-  public class RootServiceTests : TestBase
+  public class RootServiceTests : SetMonitorTestBase
   {
     [TestMethod]
     public void TestServiceRootOnStart()

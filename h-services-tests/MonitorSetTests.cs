@@ -2,6 +2,7 @@
 using System.Linq;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces.Monitoring;
+using Hylasoft.Services.Tests.Base;
 using Hylasoft.Services.Tests.Types.MonitorSets;
 using Hylasoft.Services.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Hylasoft.Services.Tests
 {
   [TestClass]
-  public class MonitorSetTests : TestBase
+  public class MonitorSetTests : SetMonitorTestBase
   {
     private readonly TestSetMonitor _testMonitor;
 

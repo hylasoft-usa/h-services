@@ -12,9 +12,9 @@ using Hylasoft.Services.Tests.Types.MonitorSets;
 using Hylasoft.Services.Tests.Types.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Hylasoft.Services.Tests
+namespace Hylasoft.Services.Tests.Base
 {
-  public abstract class TestBase
+  public abstract class SetMonitorTestBase : TestBase
   {
     private readonly KeyValuePair<int, string>[] _initialValues =
     {

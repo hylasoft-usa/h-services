@@ -1,5 +1,4 @@
-﻿using Hylasoft.Resolution;
-using Hylasoft.Services.Monitoring.Types;
+﻿using Hylasoft.Services.Tests.Base;
 using Hylasoft.Services.Tests.Types.NetworkMonitors;
 using Hylasoft.Services.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -7,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Hylasoft.Services.Tests
 {
   [TestClass]
-  public class NetworkSocketMonitorTests : TestBase
+  public class NetworkSocketMonitorTests : NetworkMonitorTestBase
   {
     [TestMethod]
     public void TestNetworkMonitorInitialize()
@@ -76,34 +75,6 @@ namespace Hylasoft.Services.Tests
 
       Assert.IsNotNull(response);
       Assert.AreEqual(request.RequestInt, response.ResponseInt);
-    }
-    
-    protected TestNetworkMonitor BuildMonitor(NetworkSocketHandler<TestRequest, RequestTypes, TestResponse, ResponseTypes> handler = null)
-    {
-      var monitor = new TestNetworkMonitor();
-      if (handler != null) monitor.Handler = handler;
-
-      return monitor;
-    }
-
-    protected TestNetworkClient BuildClient()
-    {
-      return new TestNetworkClient();
-    }
-
-    protected Result PassThrough(TestRequest request, out TestResponse response)
-    {
-      response = null;
-      if (request == null)
-        return Result.SingleFatal("No request,");
-
-      response = new TestResponse
-      {
-        ResponseInt = request.RequestInt,
-        Type = ResponseTypes.Test
-      };
-
-      return Result.Success;
     }
   }
 }

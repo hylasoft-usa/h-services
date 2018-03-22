@@ -1,11 +1,12 @@
 ﻿using System.Linq;
+using Hylasoft.Services.Tests.Base;
 using Hylasoft.Services.Tests.Types.MonitorSets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Hylasoft.Services.Tests
 {
   [TestClass]
-  class MonitorSetServiceTests : TestBase
+  class MonitorSetServiceTests : SetMonitorTestBase
   {
     [TestMethod]
     public void TestSetMonitorServiceStartup()
