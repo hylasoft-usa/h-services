@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
@@ -9,7 +8,7 @@ namespace Hylasoft.Services.Types
 {
   [Serializable]
   [XmlType(TypeName = "Result")]
-  public class NetworkResult : IEnumerable<ResultIssue>
+  public class NetworkResult
   {
     private class InternalResult : Result
     {
@@ -43,19 +42,7 @@ namespace Hylasoft.Services.Types
 
     public Result ToResult()
     {
-      return new InternalResult(this);
-    }
-
-    public IEnumerator<ResultIssue> GetEnumerator()
-    {
-      return Issues
-        .Select(issue => issue.ToIssue())
-        .GetEnumerator();
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-      return GetEnumerator();
+      return new InternalResult(Issues.Select(i => i.ToIssue()));
     }
   }
 }

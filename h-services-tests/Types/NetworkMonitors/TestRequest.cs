@@ -10,6 +10,16 @@ namespace Hylasoft.Services.Tests.Types.NetworkMonitors
   {
 
     [XmlElement(ElementName = "Int")]
-    public int TestInt { get; set; }
+    public int RequestInt { get; set; }
+
+    public TestRequest()
+    {
+      Type = RequestTypes.Test;
+    }
+
+    public TestRequest(int requestInt)
+    {
+      RequestInt = requestInt;
+    }
   }
 }

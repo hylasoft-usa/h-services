@@ -81,7 +81,8 @@
     <Compile Include="Types\MonitorSets\TestSetMonitor.cs" />
     <Compile Include="Types\NetworkMonitors\RequestTypes.cs" />
     <Compile Include="Types\NetworkMonitors\ResponseTypes.cs" />
-    <Compile Include="Types\NetworkMonitors\TestNeworkMonitor.cs" />
+    <Compile Include="Types\NetworkMonitors\TestNetworkClient.cs" />
+    <Compile Include="Types\NetworkMonitors\TestNetworkMonitor.cs" />
     <Compile Include="Types\NetworkMonitors\TestRequest.cs" />
     <Compile Include="Types\NetworkMonitors\TestResponse.cs" />
     <Compile Include="Types\Services\TestSetMonitorService.cs" />

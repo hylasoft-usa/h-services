@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Hylasoft.Resolution;
+using Hylasoft.Services.Configuration;
 using Hylasoft.Services.Constants;
 using Hylasoft.Services.Interfaces.Clients;
 using Hylasoft.Services.Interfaces.Configuration;
@@ -29,7 +30,7 @@ namespace Hylasoft.Services.Clients
 
     public SocketMonitorClient(INetworkSocketConfig config, INetworkParser netParser, ISocketPayloadSerializer payloadSerializer)
     {
-      _config = config;
+      _config = config ?? new DefaultNetworkSocketingConfig();
       _netParser = netParser;
       _payloadSerializer = payloadSerializer;
     }
@@ -50,13 +51,62 @@ namespace Hylasoft.Services.Clients
 
         clientSocket.Connect(endpoint);
         clientSocket.Send(data);
-        clientSocket.Receive(data);
 
-        return Unpack(data, out response);
+        return ReceiveResponse(clientSocket, out response);
       }
       catch (Exception e)
       {
         return ErrorOut(Result.Error(e), out response);
+      }
+    }
+
+    protected Result ReceiveResponse(Socket clientSocket, out TResponse response)
+    {
+      try
+      {
+        Result receive;
+        string message;
+        if (!(receive = ReceiveMessage(clientSocket, out message)))
+          return ErrorOut(receive, out response);
+
+        NetworkResult responseResult;
+        if (!(receive += PayloadSerializer.Deserialize<TResponse, TResponseTypes>(message, out response))
+            || response == null
+            || (responseResult = response.Result) == null)
+          return receive;
+
+        return receive + responseResult.ToResult();
+      }
+      catch (Exception e)
+      {
+        return ErrorOut(Result.Error(e), out response);
+      }
+    }
+
+    protected Result ReceiveMessage(Socket clientSocket, out string message)
+    {
+      message = null;
+
+      try
+      {
+        const int bufferSize = 1024;
+        var buffer = new byte[bufferSize];
+        var builder = new StringBuilder();
+
+        var data = string.Empty;
+        while (clientSocket.Receive(buffer, bufferSize, SocketFlags.None) > 0)
+        {
+          builder.Append(Encoding.ASCII.GetString(buffer));
+          if ((data = builder.ToString()).EndsWith(ServiceValues.EoF))
+            break;
+        }
+
+        message = data.Substring(0, data.IndexOf(ServiceValues.EoF, StringComparison.Ordinal));
+        return Result.Success;
+      }
+      catch (Exception e)
+      {
+        return Result.Error(e);
       }
     }
 
@@ -95,21 +145,6 @@ namespace Hylasoft.Services.Clients
 
       data = string.Format("{0}{1}", serialized, ServiceValues.EoF);
       return package;
-    }
-
-    protected Result Unpack(byte[] data, out TResponse response)
-    {
-      try
-      {
-        var dataStr = Encoding.ASCII.GetString(data);
-        var dataCleaned = dataStr.Substring(0, dataStr.IndexOf(ServiceValues.EoF, StringComparison.Ordinal));
-        
-        return PayloadSerializer.Deserialize<TResponse, TResponseTypes>(dataCleaned, out response);
-      }
-      catch (Exception e)
-      {
-        return ErrorOut(Result.Error(e), out response);
-      }
     }
   }
 }

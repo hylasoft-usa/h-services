@@ -175,13 +175,14 @@ namespace Hylasoft.Services.Monitoring
     #endregion
 
     #region DataObjects
-    protected class ReadState
+    protected class TransmissionState
     {
       private readonly int _bufferSize;
       private readonly byte[] _buffer;
       private readonly NetworkSocketMonitor<TRequest, TRequestTypes, TResponse, TResponseTypes> _socketMonitor;
       private readonly Socket _handler;
-      private readonly StringBuilder _message;
+
+      private readonly StringBuilder _receivingMessage;
       private readonly string _eofTerminator;
 
       public NetworkSocketMonitor<TRequest, TRequestTypes, TResponse, TResponseTypes> SocketMonitor
@@ -193,19 +194,26 @@ namespace Hylasoft.Services.Monitoring
 
       public Socket Handler { get { return _handler; } }
 
-      protected StringBuilder Message { get { return _message; } }
+      protected StringBuilder InboundMessage { get { return _receivingMessage; } }
 
       protected string EofTerminator { get { return _eofTerminator; } }
 
-      public ReadState(NetworkSocketMonitor<TRequest, TRequestTypes, TResponse, TResponseTypes> socketMonitor, int bufferSize, Socket handler, string eofTerminator)
+      protected byte[] OutboundMessage { get; private set; }
+
+      public int BytesToSend { get; private set; }
+
+      protected int TransmissionItterator { get; private set; }
+
+      public TransmissionState(NetworkSocketMonitor<TRequest, TRequestTypes, TResponse, TResponseTypes> socketMonitor, int bufferSize, Socket handler, string eofTerminator)
       {
         _socketMonitor = socketMonitor;
         _bufferSize = bufferSize;
         _handler = handler;
         _eofTerminator = eofTerminator;
 
-        _message = new StringBuilder();
+        _receivingMessage = new StringBuilder();
         _buffer = new byte[BufferSize];
+        BytesToSend = 0;
       }
 
       public void Receive()
@@ -227,10 +235,10 @@ namespace Hylasoft.Services.Monitoring
           }
 
           // Append new bytes to message.
-          Message.Append(Encoding.ASCII.GetString(Buffer, 0, bytesRead));
+          InboundMessage.Append(Encoding.ASCII.GetString(Buffer, 0, bytesRead));
 
           // If EOF is not found, then the message is not over.
-          if (!Message.ToString().EndsWith(EofTerminator))
+          if (!InboundMessage.ToString().EndsWith(EofTerminator))
             return Result.Success;
 
           // EOF was found.
@@ -246,7 +254,7 @@ namespace Hylasoft.Services.Monitoring
 
       public string Parse()
       {
-        var message = Message.ToString();
+        var message = InboundMessage.ToString();
         return message.Substring(0, message.IndexOf(EofTerminator, StringComparison.Ordinal));
       }
 
@@ -254,9 +262,36 @@ namespace Hylasoft.Services.Monitoring
       {
         try
         {
-          var data = Encoding.ASCII.GetBytes(string.Format("{0}{1}", message, EofTerminator));
-          Handler.BeginSend(data, 0, data.Length, SocketFlags.None, SocketMonitor.Terminate, this);
+          OutboundMessage = Encoding.ASCII.GetBytes(string.Format("{0}{1}", message, EofTerminator));
+          BytesToSend = OutboundMessage.Length;
+          TransmissionItterator = 0;
 
+          return Send(0);
+        }
+        catch (Exception e)
+        {
+          return Result.Error(e);
+        }
+      }
+
+      public Result Send(int bytesSent)
+      {
+        try
+        {
+          BytesToSend -= bytesSent;
+          TransmissionItterator += bytesSent;
+
+          // Still more to send.
+          if (BytesToSend > 0)
+          {
+            OutboundMessage.CopyTo(Buffer, TransmissionItterator);
+            Handler.BeginSend(Buffer, 0, Buffer.Length, SocketFlags.None, SocketMonitor.Send, this);
+            return Result.Success;
+          }
+
+          // Data sent.
+          Handler.Shutdown(SocketShutdown.Both);
+          Handler.Close();
           return Result.Success;
         }
         catch (Exception e)
@@ -284,7 +319,7 @@ namespace Hylasoft.Services.Monitoring
         const int bufferSize = 1024;
        
         // Begin receiving.
-        var state = new ReadState(this, bufferSize, handler, ServiceValues.EoF);
+        var state = new TransmissionState(this, bufferSize, handler, ServiceValues.EoF);
         state.Receive();
       }
       catch (ObjectDisposedException)
@@ -301,8 +336,8 @@ namespace Hylasoft.Services.Monitoring
     {
       try
       {
-        ReadState state;
-        if ((state = result.AsyncState as ReadState) == null)
+        TransmissionState state;
+        if ((state = result.AsyncState as TransmissionState) == null)
           return;
 
         bool done;
@@ -338,7 +373,7 @@ namespace Hylasoft.Services.Monitoring
       }
     }
 
-    protected void Send(ReadState state, Result result, TResponse baseResponse = null)
+    protected void Send(TransmissionState state, Result result, TResponse baseResponse = null)
     {
       result = result ?? Result.Success;
 
@@ -346,11 +381,12 @@ namespace Hylasoft.Services.Monitoring
       {
         string data;
         TResponse response;
+        var serialize = Result.Success;
         if (result.Any(i => i.Level >= ResultIssueLevels.Fatal)
             || (response = PackResponse(result, baseResponse)) == null
-            || !(result += PayloadSerializer.Serialize<TResponse, TResponseTypes>(response, out data))
+            || !(serialize += PayloadSerializer.Serialize<TResponse, TResponseTypes>(response, out data))
             || !state.Send(data))
-          ErrorOut(result);
+          ErrorOut(result + serialize);
       }
       catch (Exception e)
       {
@@ -358,15 +394,13 @@ namespace Hylasoft.Services.Monitoring
       }
     }
 
-    protected void Terminate(IAsyncResult result)
+    protected void Send(IAsyncResult result)
     {
-      Socket handler;
-      if ((handler = result.AsyncState as Socket) == null)
+      TransmissionState state;
+      if ((state = result.AsyncState as TransmissionState) == null)
         return;
 
-      handler.EndSend(result);
-      handler.Shutdown(SocketShutdown.Both);
-      handler.Close();
+      state.Send(state.Handler.EndSend(result));
     }
 
     protected TResponse PackResponse(Result result, TResponse baseResponse = null)
