@@ -37,17 +37,19 @@ namespace Hylasoft.Services.Clients
 
     public Result Send(TRequest request, out TResponse response)
     {
+      response = null;
+
       try
       {
         Result send;
         EndPoint endpoint;
         Socket clientSocket;
         if (!(send = NetParser.BuildNetworkBindings(Config, out clientSocket, out endpoint)))
-          return ErrorOut(send, out response);
+          return send;
         
         byte[] data;
         if (!(send = Package(request, out data)))
-          return ErrorOut(send, out response);
+          return send;
 
         clientSocket.Connect(endpoint);
         clientSocket.Send(data);
@@ -56,30 +58,34 @@ namespace Hylasoft.Services.Clients
       }
       catch (Exception e)
       {
-        return ErrorOut(Result.Error(e), out response);
+        return Result.Error(e);
       }
     }
 
     protected Result ReceiveResponse(Socket clientSocket, out TResponse response)
     {
+      response = null;
+
       try
       {
         Result receive;
         string message;
         if (!(receive = ReceiveMessage(clientSocket, out message)))
-          return ErrorOut(receive, out response);
+          return receive;
 
         NetworkResult responseResult;
-        if (!(receive += PayloadSerializer.Deserialize<TResponse, TResponseTypes>(message, out response))
-            || response == null
-            || (responseResult = response.Result) == null)
+        SocketResponsePackage<TResponse, TResponseTypes> package;
+        if (!(receive += PayloadSerializer.Deserialize(message, out package))
+            || package == null
+            || (response = package.Response) == null
+            || (responseResult = package.Result) == null)
           return receive;
 
         return receive + responseResult.ToResult();
       }
       catch (Exception e)
       {
-        return ErrorOut(Result.Error(e), out response);
+        return Result.Error(e);
       }
     }
 
@@ -110,16 +116,6 @@ namespace Hylasoft.Services.Clients
       }
     }
 
-    protected Result ErrorOut(Result error, out TResponse response)
-    {
-      response = new TResponse
-      {
-        Result = NetworkResult.FromResult(error)
-      };
-
-      return error;
-    }
-
     protected Result Package(TRequest request, out byte[] data)
     {
       data = null;
@@ -140,7 +136,7 @@ namespace Hylasoft.Services.Clients
 
       Result package;
       string serialized;
-      if (!(package = PayloadSerializer.Serialize<TRequest, TRequestTypes>(request, out serialized)))
+      if (!(package = PayloadSerializer.Serialize(request, out serialized)))
         return package;
 
       data = string.Format("{0}{1}", serialized, ServiceValues.EoF);

@@ -27,9 +27,7 @@ namespace Hylasoft.Services.Types
 
     public static NetworkResult FromResult(Result result)
     {
-      if (result == null)
-        return null;
-
+      result = result ?? Result.Success;
       var issues = result
         .Select(NetworkResultIssue.FromIssue)
         .ToArray();
@@ -42,7 +40,8 @@ namespace Hylasoft.Services.Types
 
     public Result ToResult()
     {
-      return new InternalResult(Issues.Select(i => i.ToIssue()));
+      var issues = Issues ?? new NetworkResultIssue[0];
+      return new InternalResult(issues.Select(i => i.ToIssue()));
     }
   }
 }

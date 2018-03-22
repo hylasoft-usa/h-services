@@ -11,14 +11,13 @@ namespace Hylasoft.Services.Utilities
 {
   public class SocketPayloadSerializer : ISocketPayloadSerializer
   {
-    public Result Serialize<TPayload, TPayloadTypes>(TPayload payload, out string data)
-      where TPayloadTypes : struct, IConvertible
-      where TPayload : SocketPayload<TPayloadTypes>, new()
+    public Result Serialize<TPayload>(TPayload payload, out string data)
+      where TPayload : SocketPayloadBase, new()
     {
       data = null;
       try
       {
-        var serializer = BuildSerializer<TPayload, TPayloadTypes>();
+        var serializer = BuildSerializer<TPayload>();
         var builder = new StringBuilder();
 
         using (var stringWriter = new StringWriter(builder))
@@ -34,15 +33,14 @@ namespace Hylasoft.Services.Utilities
       }
     }
 
-    public Result Deserialize<TPayload, TPayloadTypes>(string data, out TPayload payload)
-      where TPayloadTypes : struct, IConvertible
-      where TPayload : SocketPayload<TPayloadTypes>, new()
+    public Result Deserialize<TPayload>(string data, out TPayload payload)
+      where TPayload : SocketPayloadBase, new()
     {
       payload = null;
 
       try
       {
-        var serializer = BuildSerializer<TPayload, TPayloadTypes>();
+        var serializer = BuildSerializer<TPayload>();
         using (var stringReader = new StringReader(data))
           using (var reader = XmlReader.Create(stringReader))
             payload = serializer.Deserialize(reader) as TPayload;
@@ -55,9 +53,8 @@ namespace Hylasoft.Services.Utilities
       }
     }
 
-    protected XmlSerializer BuildSerializer<TPayload, TPayloadTypes>()
-      where TPayloadTypes : struct, IConvertible
-      where TPayload : SocketPayload<TPayloadTypes>, new()
+    protected XmlSerializer BuildSerializer<TPayload>()
+      where TPayload : SocketPayloadBase, new()
     {
       return new XmlSerializer(typeof (TPayload));
     }

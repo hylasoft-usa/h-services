@@ -15,6 +15,7 @@ using Hylasoft.Services.Monitoring.Types;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Types;
 
+
 namespace Hylasoft.Services.Monitoring
 {
   public abstract class NetworkSocketMonitor<TRequest, TRequestTypes, TResponse, TResponseTypes> : HMonitor, INetworkSocketMonitor<TRequest, TRequestTypes, TResponse, TResponseTypes>
@@ -380,11 +381,11 @@ namespace Hylasoft.Services.Monitoring
       try
       {
         string data;
-        TResponse response;
+        SocketResponsePackage<TResponse, TResponseTypes> response;
         var serialize = Result.Success;
         if (result.Any(i => i.Level >= ResultIssueLevels.Fatal)
             || (response = PackResponse(result, baseResponse)) == null
-            || !(serialize += PayloadSerializer.Serialize<TResponse, TResponseTypes>(response, out data))
+            || !(serialize += PayloadSerializer.Serialize(response, out data))
             || !state.Send(data))
           ErrorOut(result + serialize);
       }
@@ -403,19 +404,17 @@ namespace Hylasoft.Services.Monitoring
       state.Send(state.Handler.EndSend(result));
     }
 
-    protected TResponse PackResponse(Result result, TResponse baseResponse = null)
+    protected SocketResponsePackage<TResponse, TResponseTypes> PackResponse(Result result, TResponse baseResponse = null)
     {
       var response = baseResponse ?? new TResponse();
-      response.Result = NetworkResult.FromResult(result);
-
-      return response;
+      return new SocketResponsePackage<TResponse, TResponseTypes>(response, result);
     }
     #endregion
 
     #region Abstract Methods
     protected virtual Result BuildRequest(string message, out TRequest request)
     {
-      return PayloadSerializer.Deserialize<TRequest, TRequestTypes>(message, out request);
+      return PayloadSerializer.Deserialize(message, out request);
     }
     #endregion
   }

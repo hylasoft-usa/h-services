@@ -8,7 +8,5 @@ namespace Hylasoft.Services.Types
   public class SocketResponse<TResponseTypes> : SocketPayload<TResponseTypes>
     where TResponseTypes : struct, IConvertible
   {
-    [XmlElement(ElementName = "Result")]
-    public NetworkResult Result { get; set; }
   }
 }

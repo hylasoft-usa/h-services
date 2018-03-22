@@ -6,7 +6,7 @@ namespace Hylasoft.Services.Types
 {
   [Serializable]
   [XmlType(TypeName = "Message")]
-  public class SocketPayload<TPayloadTypes>
+  public class SocketPayload<TPayloadTypes> : SocketPayloadBase
     where TPayloadTypes : struct, IConvertible
   {
     [XmlElement(ElementName = "Type")]

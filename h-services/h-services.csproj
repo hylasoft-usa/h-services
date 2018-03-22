@@ -120,8 +120,10 @@
     <Compile Include="Types\ServiceStatuses.cs" />
     <Compile Include="Types\ServiceStatusTransition.cs" />
     <Compile Include="Types\SocketPayload.cs" />
+    <Compile Include="Types\SocketPayloadBase.cs" />
     <Compile Include="Types\SocketRequest.cs" />
     <Compile Include="Types\SocketResponse.cs" />
+    <Compile Include="Types\SocketResponsePackage.cs" />
     <Compile Include="Utilities\ItemSetComparer.cs" />
     <Compile Include="Utilities\NetworkParser.cs" />
     <Compile Include="Utilities\SocketPayloadSerializer.cs" />

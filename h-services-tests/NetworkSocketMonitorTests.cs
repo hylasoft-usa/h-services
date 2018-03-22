@@ -1,7 +1,6 @@
 ﻿using Hylasoft.Resolution;
 using Hylasoft.Services.Monitoring.Types;
 using Hylasoft.Services.Tests.Types.NetworkMonitors;
-using Hylasoft.Services.Types;
 using Hylasoft.Services.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -51,11 +50,11 @@ namespace Hylasoft.Services.Tests
       };
 
       string data;
-      Assert.IsTrue(serializer.Serialize<TestRequest, RequestTypes>(payload, out data));
+      Assert.IsTrue(serializer.Serialize(payload, out data));
       Assert.IsNotNull(data);
 
       TestRequest deserialized;
-      Assert.IsTrue(serializer.Deserialize<TestRequest, RequestTypes>(data, out deserialized));
+      Assert.IsTrue(serializer.Deserialize(data, out deserialized));
       Assert.IsNotNull(deserialized);
       Assert.AreEqual(payload.Type, deserialized.Type);
       Assert.AreEqual(payload.RequestInt, deserialized.RequestInt);
@@ -74,6 +73,9 @@ namespace Hylasoft.Services.Tests
       Assert.IsTrue(monitor.Start());
       Assert.IsTrue(client.Send(request, out response));
       Assert.IsTrue(monitor.Stop());
+
+      Assert.IsNotNull(response);
+      Assert.AreEqual(request.RequestInt, response.ResponseInt);
     }
     
     protected TestNetworkMonitor BuildMonitor(NetworkSocketHandler<TestRequest, RequestTypes, TestResponse, ResponseTypes> handler = null)
@@ -98,8 +100,7 @@ namespace Hylasoft.Services.Tests
       response = new TestResponse
       {
         ResponseInt = request.RequestInt,
-        Type = ResponseTypes.Test,
-        Result = NetworkResult.FromResult(Result.Success)
+        Type = ResponseTypes.Test
       };
 
       return Result.Success;
