@@ -114,7 +114,7 @@ namespace Hylasoft.Services.Monitoring.Base
       while (IsRunning || IsPaused)
       {
         // TODO: Consider a re-try mechanism.
-        if (IsRunning && !(loop = ExecServiceLoop()))
+        if (ShouldPerformServiceLoop() && !(loop = ExecServiceLoop()))
           ErrorOut(loop);
 
         Thread.Sleep(Config.MonitorSleepInMilliseconds);
@@ -122,6 +122,14 @@ namespace Hylasoft.Services.Monitoring.Base
 
       if (!IsFailed)
         SetStopped(loop);
+    }
+    #endregion
+
+    #region Protected Virtual Methods
+
+    protected virtual bool ShouldPerformServiceLoop()
+    {
+      return IsRunning;
     }
     #endregion
 
