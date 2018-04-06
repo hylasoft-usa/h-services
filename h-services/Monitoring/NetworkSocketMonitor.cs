@@ -285,18 +285,27 @@ namespace Hylasoft.Services.Monitoring
           // Still more to send.
           if (BytesToSend > 0)
           {
-            OutboundMessage.CopyTo(Buffer, TransmissionItterator);
+            OutboundMessage
+              .Skip(TransmissionItterator)
+              .Take(Buffer.Length)
+              .ToArray()
+              .CopyTo(Buffer, 0);
+
             Handler.BeginSend(Buffer, 0, Buffer.Length, SocketFlags.None, SocketMonitor.Send, this);
             return Result.Success;
           }
 
-          // Data sent.
           Handler.Shutdown(SocketShutdown.Both);
           Handler.Close();
+
+          // Data sent.
           return Result.Success;
         }
         catch (Exception e)
         {
+          Handler.Shutdown(SocketShutdown.Both);
+          Handler.Close();
+
           return Result.Error(e);
         }
       }
