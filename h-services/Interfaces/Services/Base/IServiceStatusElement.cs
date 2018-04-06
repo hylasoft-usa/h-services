@@ -8,15 +8,15 @@ namespace Hylasoft.Services.Interfaces.Services.Base
   {
     ServiceStatuses Status { get; }
 
-    Result Initialize();
+    Result Initialize(Result reason = null);
 
-    Result Start();
+    Result Start(Result reason = null);
 
-    Result Stop();
+    Result Stop(Result reason = null);
 
-    Result Pause();
+    Result Pause(Result reason = null);
 
-    Result Restart();
+    Result Restart(Result reason = null);
 
     event EventHandler<ServiceStatusTransition> StatusChanged;
 
@@ -29,5 +29,7 @@ namespace Hylasoft.Services.Interfaces.Services.Base
     bool IsFailed { get; }
 
     bool IsPaused { get; }
+
+    Result LastTransitionReason { get; }
   }
 }
