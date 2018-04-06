@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using Hylasoft.Resolution;
 
 namespace Hylasoft.Services.Interfaces.Monitoring
 {
@@ -11,5 +12,7 @@ namespace Hylasoft.Services.Interfaces.Monitoring
     event EventHandler<Collection<TItem>> ItemsAdded;
 
     event EventHandler<Collection<TItem>> ItemsRemoved;
+
+    Result GetCurrentSet(out Collection<TItem> monitoredItems);
   }
 }

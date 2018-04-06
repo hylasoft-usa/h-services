@@ -7,7 +7,7 @@ using Hylasoft.Services.Services.Base;
 
 namespace Hylasoft.Services.Services
 {
-  public abstract class MonitorSetService<TMonitor, TItem> : HMonitorService<TMonitor>, IMonitorSetService
+  public abstract class MonitorSetService<TMonitor, TItem> : HMonitorService<TMonitor>, IMonitorSetService<TItem>
     where TItem : class
     where TMonitor : class, ISetMonitor<TItem>
   {
@@ -26,6 +26,13 @@ namespace Hylasoft.Services.Services
       Monitor.ItemsAdded += OnItemsAdded;
       Monitor.ItemsRemoved += OnItemsRemoved;
       return init;
+    }
+    #endregion
+
+    #region IMonitorSetService Implementation
+    public Result GetCurrentSet(out Collection<TItem> monitoredItems)
+    {
+      return Monitor.GetCurrentSet(out monitoredItems);
     }
     #endregion
 

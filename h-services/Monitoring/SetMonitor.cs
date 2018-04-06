@@ -29,6 +29,23 @@ namespace Hylasoft.Services.Monitoring
       _set = new Dictionary<TItemSpec, TItem>(Comparer);
     }
 
+    #region ISetMonitor Implementation
+
+    public Result GetCurrentSet(out Collection<TItem> monitoredItems)
+    {
+      try
+      {
+        monitoredItems = Set.Values.ToCollection();
+        return Result.Success;
+      }
+      catch (Exception e)
+      {
+        monitoredItems = null;
+        return Result.Error(e);
+      }
+    }
+    #endregion
+
     #region ServiceBase Implementation
     protected override Result OnInitialize()
     {
@@ -53,7 +70,7 @@ namespace Hylasoft.Services.Monitoring
     protected override Result InitializeService()
     {
       return OnInitialize();
-    }
+    }    
     #endregion
 
     #region Abstract Methods
