@@ -341,7 +341,6 @@ namespace Hylasoft.Services.Services.Base
     {
       try
       {
-        TriggerErrorOccured(error);
         var status = error
           ? ServiceStatuses.Stopped
           : ServiceStatuses.Failed;

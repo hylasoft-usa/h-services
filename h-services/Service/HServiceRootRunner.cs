@@ -47,17 +47,19 @@ namespace Hylasoft.Services.Service
 
     public void OnStart(string[] args)
     {
-      if (!IsInitialized )
+      bool wasInitialized;
+      if (!(wasInitialized = IsInitialized))
       {
-        Result init;
-        if (!(init = InitializeService()))
-          // TODO: Consider crashing the entire service.
-          HandleError(this, init);
-
+        InitializeService();
         IsInitialized = true;
       }
 
-      ServiceAction(service => service.Start, InitializedByStartup);
+      // Don't try to start a service that failed initialization.
+      var condition = wasInitialized
+        ? Always
+        : (Func<IHService, bool>) (s => s != null && !s.IsFailed);
+
+      ServiceAction(service => service.Start, InitializedByStartup, condition);
     }
 
     public void OnStop()
@@ -117,15 +119,17 @@ namespace Hylasoft.Services.Service
       return HandleServiceAction(result);
     }
 
-    protected Result ServiceAction(Func<IHService, Func<Result, Result>> getAction, Result reason)
+    protected Result ServiceAction(Func<IHService, Func<Result, Result>> getAction, Result reason, Func<IHService, bool> condition = null)
     {
-      return ServiceAction(getAction, (IEnumerable<IHService>) null, reason);
+      return ServiceAction(getAction, null, reason, condition);
     }
 
-    protected Result ServiceAction(Func<IHService, Func<Result,Result>> getAction, IEnumerable<IHService> services = null, Result reason = null)
+    protected Result ServiceAction(Func<IHService, Func<Result, Result>> getAction, IEnumerable<IHService> services = null, Result reason = null, Func<IHService, bool> condition = null)
     {
       services = services ?? Services;
-      var result = services.Aggregate(Result.Success, (current, service) => current + PerformServiceAction(getAction(service), reason));
+      condition = condition ?? Always;
+
+      var result = services.Aggregate(Result.Success, (current, service) => condition(service) ? current + PerformServiceAction(getAction(service), reason) : current);
       return HandleServiceAction(result);
     }
 
@@ -168,5 +172,10 @@ namespace Hylasoft.Services.Service
       return Result.Success;
     }
     #endregion
+
+    private bool Always(IHService service)
+    {
+      return service != null;
+    }
   }
 }

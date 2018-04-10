@@ -61,7 +61,10 @@ namespace Hylasoft.Services.Services.Base
       var reason = transition.Reason;
       // If the monitor fails, also have the service fail.
       if (transition.CurrentStatus == ServiceStatuses.Failed)
+      {
+        TriggerErrorOccured(reason);
         ErrorOut(reason);
+      }
     }
   }
 }
