@@ -143,13 +143,13 @@ namespace Hylasoft.Services.Service
 
     protected Result HandleServiceAction(Result result)
     {
-      Logger.Log(result);
+      Logger.LogSynchronous(result);
       return result;
     }
 
     protected void HandleError(object o, Result result)
     {
-      Logger.Log(result);
+      Logger.LogSynchronous(result);
     }
 
     protected void HandleStatusChange(object o, ServiceStatusTransition transition)
@@ -157,7 +157,7 @@ namespace Hylasoft.Services.Service
       var service = o as HService;
       if (service == null) return;
 
-      Logger.Log(Result.SingleInfo(Messages.ServiceStatusChanged, service, transition.CurrentStatus));
+      Logger.LogSynchronous(Result.SingleInfo(Messages.ServiceStatusChanged, service, transition.CurrentStatus));
     }
 
     protected virtual Result BindService(IHService service)
