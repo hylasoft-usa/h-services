@@ -122,6 +122,8 @@ namespace Hylasoft.Services.Services.Base
     }
 
     public event EventHandler<ServiceStatusTransition> StatusChanged;
+    
+    public event EventHandler<Result> ErrorOccured;
 
     public bool IsRunning
     {
@@ -322,6 +324,11 @@ namespace Hylasoft.Services.Services.Base
       if (StatusChanged != null)
         StatusChanged(this, new ServiceStatusTransition(oldStatus, newStatus, reason));
     }
+
+    protected void TriggerErrorOccured(Result error)
+    {
+      if (ErrorOccured != null && !error) ErrorOccured(this, error);
+    }
     #endregion
 
     #region Helper Methods
@@ -330,10 +337,11 @@ namespace Hylasoft.Services.Services.Base
       return ErrorOut(Result.Error(e));
     }
 
-    protected Result ErrorOut(Result error)
+    protected virtual Result ErrorOut(Result error)
     {
       try
       {
+        TriggerErrorOccured(error);
         var status = error
           ? ServiceStatuses.Stopped
           : ServiceStatuses.Failed;
@@ -344,7 +352,7 @@ namespace Hylasoft.Services.Services.Base
       {
         error += Result.Error(transitionFailed);
       }
-
+      
       return error;
     }
     #endregion

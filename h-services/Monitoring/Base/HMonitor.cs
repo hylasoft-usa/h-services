@@ -75,8 +75,6 @@ namespace Hylasoft.Services.Monitoring.Base
     }
 
     #region IService Implementation
-    public event EventHandler<Result> ErrorOccured;
-
     protected void RaiseError(Result error)
     {
       if (!error) TriggerErrorOccured(error);
@@ -130,14 +128,6 @@ namespace Hylasoft.Services.Monitoring.Base
     protected virtual bool ShouldPerformServiceLoop()
     {
       return IsRunning;
-    }
-    #endregion
-
-    #region Helper Methods
-    private void TriggerErrorOccured(Result error)
-    {
-      if (ErrorOccured != null)
-        ErrorOccured(this, error);
     }
     #endregion
   }

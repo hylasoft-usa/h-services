@@ -20,6 +20,8 @@ namespace Hylasoft.Services.Interfaces.Services.Base
 
     event EventHandler<ServiceStatusTransition> StatusChanged;
 
+    event EventHandler<Result> ErrorOccured;
+
     string ServiceName { get; }
 
     bool IsRunning { get; }
