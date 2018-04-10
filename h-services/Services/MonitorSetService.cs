@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces.Monitoring;
 using Hylasoft.Services.Interfaces.Services;
@@ -18,13 +19,20 @@ namespace Hylasoft.Services.Services
     #region HService Implementation
     protected override Result OnInitialize()
     {
-      Result init;
-      if (!(init = Monitor.Initialize()))
-        return init;
+      var init = Result.Success;
+      try
+      {
+        init += Monitor.Initialize();
 
-      Monitor.ItemChanged += OnItemChange;
-      Monitor.ItemsAdded += OnItemsAdded;
-      Monitor.ItemsRemoved += OnItemsRemoved;
+        Monitor.ItemChanged += OnItemChange;
+        Monitor.ItemsAdded += OnItemsAdded;
+        Monitor.ItemsRemoved += OnItemsRemoved;
+      }
+      catch (Exception e)
+      {
+        init += Result.Error(e);
+      }
+      
       return init;
     }
     #endregion
