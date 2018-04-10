@@ -390,13 +390,17 @@ namespace Hylasoft.Services.Monitoring
       try
       {
         string data;
-        SocketResponsePackage<TResponse, TResponseTypes> response;
         var serialize = Result.Success;
-        if (result.Any(i => i.Level >= ResultIssueLevels.Fatal)
+        SocketResponsePackage<TResponse, TResponseTypes> response;
+        // TODO: Consider other options.
+        if (result.Any(i => i.Level >= ResultIssueLevels.Fatal))
+          ErrorOut(result);
+        
+        if (IsFailed
             || (response = PackResponse(result, baseResponse)) == null
             || !(serialize += PayloadSerializer.Serialize(response, out data))
             || !state.Send(data))
-          ErrorOut(result + serialize);
+          Send(state, result + serialize);
       }
       catch (Exception e)
       {
