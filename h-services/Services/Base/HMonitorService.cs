@@ -1,6 +1,8 @@
-﻿using Hylasoft.Resolution;
+﻿using System;
+using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces.Monitoring;
 using Hylasoft.Services.Interfaces.Validation;
+using Hylasoft.Services.Types;
 
 namespace Hylasoft.Services.Services.Base
 {
@@ -18,7 +20,18 @@ namespace Hylasoft.Services.Services.Base
 
     protected override Result OnInitialize()
     {
-      return Monitor.Initialize();
+      var init = Result.Success;
+      try
+      {
+        init += Monitor.Initialize();
+        Monitor.StatusChanged += OnMonitorTransition;
+      }
+      catch (Exception e)
+      {
+        init += Result.Error(e);
+      }
+
+      return init;
     }
 
     protected override Result OnStart()
@@ -39,6 +52,16 @@ namespace Hylasoft.Services.Services.Base
     public override string ServiceName
     {
       get { return Monitor.ServiceName; }
+    }
+
+    private void OnMonitorTransition(object sender, ServiceStatusTransition transition)
+    {
+      if (transition == null) return;
+
+      var reason = transition.Reason;
+      // If the monitor fails, also have the service fail.
+      if (transition.CurrentStatus == ServiceStatuses.Failed)
+        ErrorOut(reason);
     }
   }
 }
