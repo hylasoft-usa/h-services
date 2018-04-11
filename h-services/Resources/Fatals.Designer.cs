@@ -61,6 +61,24 @@ namespace Hylasoft.Services.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Missing status information on &apos;{0}&apos; Service within the {1} Service..
+        /// </summary>
+        internal static string KeepAliveServiceMissingService {
+            get {
+                return ResourceManager.GetString("KeepAliveServiceMissingService", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A null service reference was passed into the {0} Service..
+        /// </summary>
+        internal static string KeepAliveServicePassedNullService {
+            get {
+                return ResourceManager.GetString("KeepAliveServicePassedNullService", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} was started without a functioning endpoint..
         /// </summary>
         internal static string NetworkSocketServiceStartedWithoutEndpoint {

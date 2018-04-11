@@ -117,6 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="KeepAliveServiceMissingService" xml:space="preserve">
+    <value>Missing status information on '{0}' Service within the {1} Service.</value>
+  </data>
+  <data name="KeepAliveServicePassedNullService" xml:space="preserve">
+    <value>A null service reference was passed into the {0} Service.</value>
+  </data>
   <data name="NetworkSocketServiceStartedWithoutEndpoint" xml:space="preserve">
     <value>{0} was started without a functioning endpoint.</value>
   </data>
