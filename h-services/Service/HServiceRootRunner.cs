@@ -169,6 +169,10 @@ namespace Hylasoft.Services.Service
       service.ErrorOccured += HandleError;
       service.StatusChanged += HandleStatusChange;
 
+      IInteractiveService interactive;
+      if ((interactive = service as IInteractiveService) != null)
+        interactive.SetServices(Services);
+
       return Result.Success;
     }
     #endregion
