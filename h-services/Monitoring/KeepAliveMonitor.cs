@@ -178,7 +178,8 @@ namespace Hylasoft.Services.Monitoring
       // Status is failed.
       Result revive;
       bool shouldRevive;
-      if (!(revive = CheckIfShouldRevive(serviceInfo, out shouldRevive)) || !shouldRevive)
+      TimeSpan? secondsToWait;
+      if (!(revive = CheckIfShouldRevive(serviceInfo, out shouldRevive, out secondsToWait)) || !shouldRevive)
         return revive;
 
       // Status is failed and should be revived.
@@ -192,6 +193,7 @@ namespace Hylasoft.Services.Monitoring
         // Failed to revive.
         ++serviceInfo.FailedAttempts;
         serviceInfo.LastAttempt = DateTime.Now;
+        serviceInfo.CurrentWaitTicks = secondsToWait == null ? (long?) null : secondsToWait.Value.Ticks;
         return revive + TriggerReviveFailed(service);
       }
 
@@ -205,9 +207,10 @@ namespace Hylasoft.Services.Monitoring
       return TriggerServiceRevived(service);
     }
 
-    protected Result CheckIfShouldRevive(ServiceStatusInformation serviceInfo, out bool shouldRevive)
+    protected Result CheckIfShouldRevive(ServiceStatusInformation serviceInfo, out bool shouldRevive, out TimeSpan? secondsToWait)
     {
       shouldRevive = false;
+      secondsToWait = null;
 
       // This is not likely to ever happen, without significant rewrites.
       if (serviceInfo == null)
@@ -222,7 +225,6 @@ namespace Hylasoft.Services.Monitoring
       }
 
       Result check;
-      TimeSpan secondsToWait;
       if (!(check = GetRevivalTimespan(serviceInfo, out secondsToWait)))
         return check;
 
@@ -232,7 +234,7 @@ namespace Hylasoft.Services.Monitoring
       return check;
     }
 
-    protected Result GetRevivalTimespan(ServiceStatusInformation serviceInfo, out TimeSpan secondsToWait)
+    protected Result GetRevivalTimespan(ServiceStatusInformation serviceInfo, out TimeSpan? secondsToWait)
     {
       secondsToWait = TimeSpan.FromTicks(long.MaxValue);
 
