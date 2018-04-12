@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Resolution;
+using Hylasoft.Services.Interfaces.Monitoring;
+using Hylasoft.Services.Tests.Base;
 using Hylasoft.Services.Tests.Types.MonitorSets;
 using Hylasoft.Services.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -8,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Hylasoft.Services.Tests
 {
   [TestClass]
-  public class MonitorSetTests : TestBase
+  public class MonitorSetTests : SetMonitorTestBase
   {
     private readonly TestSetMonitor _testMonitor;
 
@@ -60,7 +62,7 @@ namespace Hylasoft.Services.Tests
 
       Assert.AreEqual(TransitionCount, 0);
 
-      Assert.IsTrue(monitor.Start());
+      AssertStartup(monitor);
       Assert.IsTrue(monitor.Stop());
 
       // Starting, Started, Stopping, Stopped.
@@ -81,7 +83,7 @@ namespace Hylasoft.Services.Tests
       set[key] = initValue;
       Assert.IsNull(LastChange);
 
-      Assert.IsTrue(monitor.Start());
+      AssertStartup(monitor);
       Assert.AreEqual(ChangeCount, 0);
       AssertValueChange(monitor, key, changeValue);
       AssertValueChange(monitor, key, initValue);
@@ -99,7 +101,7 @@ namespace Hylasoft.Services.Tests
 
       const string changedValue = "ChangedValue";
 
-      Assert.IsTrue(TestMonitor.Start());
+      AssertStartup(TestMonitor);
       Assert.AreEqual(ChangeCount, 0);
       
       AssertValueChange(TestMonitor, key, changedValue);
@@ -120,7 +122,7 @@ namespace Hylasoft.Services.Tests
     public void TestSetMonitorFailureOnStartUp()
     {
       var failMonitor = BuildFailMonitor(true);
-      Assert.IsFalse(failMonitor.Start());
+      AssertStartup(failMonitor, false);
 
       // Expected Failed
       Assert.AreEqual(TransitionCount, 1);
@@ -132,12 +134,12 @@ namespace Hylasoft.Services.Tests
     {
       var transCount = 0;
       var failMonitor = BuildFailMonitor(false);
-      Assert.IsTrue(failMonitor.Start());
+      AssertStartup(failMonitor);
       Assert.IsTrue(failMonitor.Stop());
 
       // Starting, Started, Stopping, Stopped.
       Assert.AreEqual(TransitionCount, transCount += 4);
-      Assert.IsTrue(failMonitor.Start());
+      AssertStartup(failMonitor);
 
       // + Starting, Started
       Assert.AreEqual(TransitionCount, transCount += 2);
@@ -150,13 +152,13 @@ namespace Hylasoft.Services.Tests
       Assert.AreEqual(TransitionCount, transCount += 1);
       AssertIsFailed(failMonitor);
 
-      Assert.IsFalse(failMonitor.Start());
-      // + Starting, Failed
-      Assert.AreEqual(TransitionCount, transCount += 2);
+      AssertStartup(failMonitor, false);
+      // + Starting, Started, Failed
+      Assert.AreEqual(TransitionCount, transCount += 3);
       AssertIsFailed(failMonitor);
 
       failMonitor.ShouldFail = false;
-      Assert.IsTrue(failMonitor.Start());
+      AssertStartup(failMonitor);
       // + Starting, Started
       Assert.AreEqual(TransitionCount, transCount += 2);
       
@@ -178,8 +180,7 @@ namespace Hylasoft.Services.Tests
       const string newInitValue = "Value12";
       const string newChangedValue = "Changed12";
 
-      Assert.IsTrue(monitor.Start());
-      
+      AssertStartup(monitor);
       AssertValueAdd(monitor, newKey, newInitValue);
       AssertValueChange(monitor, newKey, newChangedValue);
 
@@ -193,7 +194,7 @@ namespace Hylasoft.Services.Tests
 
       var valueToRemove = InitialValues.FirstOrDefault();
       Assert.IsNotNull(valueToRemove);
-      Assert.IsTrue(monitor.Start());
+      AssertStartup(monitor);
       AssertValueRemove(monitor, valueToRemove.Key);
 
       const int newKey = 5;
@@ -233,6 +234,26 @@ namespace Hylasoft.Services.Tests
     #endregion
 
     #region Helpers
+
+    protected void AssertStartup(TestSetMonitor monitor, bool success = true)
+    {
+      Assert.IsNotNull(monitor);
+      
+      if (!success)
+      {
+        Result startup;
+        if (!(startup = monitor.Start()))
+          return;
+        
+        monitor.WaitOnUpdate();
+        AssertIsFailed(monitor);
+        return;
+      }
+
+      Assert.IsTrue(monitor.Start());
+      monitor.WaitOnUpdate();
+    }
+
     protected void AssertValueChange(TestSetMonitor monitor, int key, string value)
     {
       Assert.AreNotEqual(monitor.InnerSet[key], value);

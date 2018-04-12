@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Services;
 using Hylasoft.Services.Tests.Types.MonitorSets;
 

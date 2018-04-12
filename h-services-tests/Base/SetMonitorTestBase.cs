@@ -2,7 +2,9 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using Hylasoft.Logging;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Interfaces.Providers;
+using Hylasoft.Services.Interfaces.Services;
+using Hylasoft.Services.Interfaces.Services.Base;
 using Hylasoft.Services.Providers;
 using Hylasoft.Services.Service;
 using Hylasoft.Services.Tests.Types.Loggers;
@@ -10,9 +12,9 @@ using Hylasoft.Services.Tests.Types.MonitorSets;
 using Hylasoft.Services.Tests.Types.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Hylasoft.Services.Tests
+namespace Hylasoft.Services.Tests.Base
 {
-  public abstract class TestBase
+  public abstract class SetMonitorTestBase : TestBase
   {
     private readonly KeyValuePair<int, string>[] _initialValues =
     {

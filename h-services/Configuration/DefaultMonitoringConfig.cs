@@ -1,8 +1,8 @@
-﻿using Hylasoft.Services.Interfaces;
+﻿using Hylasoft.Services.Interfaces.Configuration;
 
 namespace Hylasoft.Services.Configuration
 {
-  public class DefaultMonitoringConfig : IMonitoringConfig
+  internal class DefaultMonitoringConfig : IMonitoringConfig
   {
     public int AbortTimeoutInSeconds { get { return 45; }}
 

@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using Hylasoft.Services.Types;
 
-namespace Hylasoft.Services.Interfaces
+namespace Hylasoft.Services.Interfaces.Validation
 {
 	public interface IServiceValidator
 	{

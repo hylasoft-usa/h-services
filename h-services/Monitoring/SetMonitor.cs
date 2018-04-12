@@ -4,7 +4,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Hylasoft.Extensions;
 using Hylasoft.Resolution;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Interfaces.Configuration;
+using Hylasoft.Services.Interfaces.Monitoring;
+using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Monitoring.Base;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Utilities;
@@ -26,6 +28,23 @@ namespace Hylasoft.Services.Monitoring
       _comparer = new ItemSetComparer<TItemSpec>(AreItemsEqual, GetItemSpecHash);
       _set = new Dictionary<TItemSpec, TItem>(Comparer);
     }
+
+    #region ISetMonitor Implementation
+
+    public Result GetCurrentSet(out Collection<TItem> monitoredItems)
+    {
+      try
+      {
+        monitoredItems = Set.Values.ToCollection();
+        return Result.Success;
+      }
+      catch (Exception e)
+      {
+        monitoredItems = null;
+        return Result.Error(e);
+      }
+    }
+    #endregion
 
     #region ServiceBase Implementation
     protected override Result OnInitialize()
@@ -51,7 +70,7 @@ namespace Hylasoft.Services.Monitoring
     protected override Result InitializeService()
     {
       return OnInitialize();
-    }
+    }    
     #endregion
 
     #region Abstract Methods

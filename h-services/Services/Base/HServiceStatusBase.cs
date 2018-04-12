@@ -1,6 +1,8 @@
 ﻿using System;
 using Hylasoft.Resolution;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Constants;
+using Hylasoft.Services.Interfaces.Services.Base;
+using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Types;
 using Hylasoft.Services.Validation;
@@ -23,13 +25,11 @@ namespace Hylasoft.Services.Services.Base
 
     protected IServiceValidator ServiceValidator { get { return _serviceValidator; } }
 
-    protected Result LastTransitionReason { get; private set; }
-
     protected HServiceStatusBase(IServiceValidator serviceValidator = null)
     {
       _status = ServiceStatuses.Stopped;
       _serviceValidator = serviceValidator ?? new ServiceValidator();
-      _userRequestedTransition = Result.SingleDebug(Debugs.UserRequestedTransition);
+      _userRequestedTransition = Result.SingleDebug(ServiceReasons.UserRequestedTransition, Debugs.UserRequestedTransition);
       IsInitialized = false;
       LastTransitionReason = UserRequestedTransition;
     }
@@ -51,7 +51,7 @@ namespace Hylasoft.Services.Services.Base
       }
     }
 
-    public Result Initialize()
+    public Result Initialize(Result reason = null)
     {
       try
       {
@@ -64,12 +64,12 @@ namespace Hylasoft.Services.Services.Base
       }
     }
 
-    public Result Start()
+    public Result Start(Result reason = null)
     {
       try
       {
         lock (_statusTransitionLock)
-          return LockedStart();
+          return LockedStart(reason);
       }
       catch (Exception e)
       {
@@ -77,12 +77,12 @@ namespace Hylasoft.Services.Services.Base
       }
     }
 
-    public Result Stop()
+    public Result Stop(Result reason = null)
     {
       try
       {
         lock (_statusTransitionLock)
-          return LockedStop();
+          return LockedStop(reason);
       }
       catch (Exception e)
       {
@@ -90,12 +90,12 @@ namespace Hylasoft.Services.Services.Base
       }
     }
 
-    public Result Pause()
+    public Result Pause(Result reason = null)
     {
       try
       {
         lock (_statusTransitionLock)
-          return LockedPause();
+          return LockedPause(reason);
       }
       catch (Exception e)
       {
@@ -103,17 +103,17 @@ namespace Hylasoft.Services.Services.Base
       }
     }
 
-    public Result Restart()
+    public Result Restart(Result reason = null)
     {
       try
       {
         lock (_statusTransitionLock)
         {
           Result restart;
-          if (!(restart = LockedStop()))
+          if (!(restart = LockedStop(reason)))
             return ErrorOut(restart);
 
-          return restart + LockedStart();
+          return restart + LockedStart(reason);
         }
       }
       catch (Exception e)
@@ -123,6 +123,8 @@ namespace Hylasoft.Services.Services.Base
     }
 
     public event EventHandler<ServiceStatusTransition> StatusChanged;
+    
+    public event EventHandler<Result> ErrorOccured;
 
     public bool IsRunning
     {
@@ -182,26 +184,28 @@ namespace Hylasoft.Services.Services.Base
         return false;
       }
     }
+
+    public Result LastTransitionReason { get; private set; }
     #endregion
 
     #region Domain Methods
-    private Result LockedStart()
+    private Result LockedStart(Result reason)
     {
       var start = Result.Success;
       if (!IsInitialized && !(start += Initialize()))
         return start;
 
       return start + LockedMajorTransition(ServiceStatuses.Starting, ServiceStatuses.Started, StartService,
-        IsRunning, Warnings.MonitorIsAlreadyRunning);
+        IsRunning, Warnings.MonitorIsAlreadyRunning, reason);
     }
 
-    private Result LockedStop()
+    private Result LockedStop(Result reason)
     {
       return LockedMajorTransition(ServiceStatuses.Stopping, ServiceStatuses.Stopped, StopService,
-        IsStopped, Warnings.MonitorIsAlreadyStopped);
+        IsStopped, Warnings.MonitorIsAlreadyStopped, reason);
     }
 
-    private Result LockedPause()
+    private Result LockedPause(Result reason)
     {
       if (!IsRunning)
         return Result.SingleWarning(Warnings.MonitorIsAlreadyStopped, ServiceName);
@@ -211,7 +215,7 @@ namespace Hylasoft.Services.Services.Base
         return ErrorOut(pause);
       
       if (Status != ServiceStatuses.Paused)
-        pause += TransitionStatus(ServiceStatuses.Paused);
+        pause += TransitionStatus(ServiceStatuses.Paused, reason);
 
       return pause;
     }
@@ -230,20 +234,20 @@ namespace Hylasoft.Services.Services.Base
     }
 
     private Result LockedMajorTransition(ServiceStatuses initialTransition, ServiceStatuses finalTransition,
-      Func<Result> serviceCall, bool statusCheck, string statusWarning)
+      Func<Result> serviceCall, bool statusCheck, string statusWarning, Result reason = null)
     {
       if (statusCheck)
         return Result.SingleWarning(statusWarning, ServiceName);
 
       Result transition;
-      if (!(transition = TransitionStatus(initialTransition)))
+      if (!(transition = TransitionStatus(initialTransition, reason)))
         return ErrorOut(transition);
 
       if (!(transition += serviceCall()))
         return ErrorOut(transition);
 
       if (Status != finalTransition)
-        transition += TransitionStatus(finalTransition);
+        transition += TransitionStatus(finalTransition, reason);
 
       return transition;
     }
@@ -262,7 +266,7 @@ namespace Hylasoft.Services.Services.Base
     #endregion
 
     #region Status Methods
-    protected Result SetRunning(Result reason = null)
+    protected internal Result SetRunning(Result reason = null)
     {
       return TransitionStatus(ServiceStatuses.Started, reason);
     }
@@ -321,6 +325,11 @@ namespace Hylasoft.Services.Services.Base
       if (StatusChanged != null)
         StatusChanged(this, new ServiceStatusTransition(oldStatus, newStatus, reason));
     }
+
+    protected void TriggerErrorOccured(Result error)
+    {
+      if (ErrorOccured != null && !error) ErrorOccured(this, error);
+    }
     #endregion
 
     #region Helper Methods
@@ -329,7 +338,7 @@ namespace Hylasoft.Services.Services.Base
       return ErrorOut(Result.Error(e));
     }
 
-    protected Result ErrorOut(Result error)
+    protected virtual Result ErrorOut(Result error)
     {
       try
       {
@@ -337,13 +346,14 @@ namespace Hylasoft.Services.Services.Base
           ? ServiceStatuses.Stopped
           : ServiceStatuses.Failed;
 
-        error += TransitionStatus(status, error);
+        if (Status != status)
+          error += TransitionStatus(status, error);
       }
       catch (Exception transitionFailed)
       {
         error += Result.Error(transitionFailed);
       }
-
+      
       return error;
     }
     #endregion

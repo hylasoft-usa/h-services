@@ -1,54 +1,46 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using Hylasoft.Resolution;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Interfaces.Monitoring;
+using Hylasoft.Services.Interfaces.Services;
+using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Services.Base;
 
 namespace Hylasoft.Services.Services
 {
-  public abstract class MonitorSetService<TMonitor, TItem> : HService
+  public abstract class MonitorSetService<TMonitor, TItem> : HMonitorService<TMonitor>, IMonitorSetService<TItem>
     where TItem : class
     where TMonitor : class, ISetMonitor<TItem>
   {
-    private readonly TMonitor _monitor;
-
-    protected TMonitor Monitor { get { return _monitor; } }
-
-    protected MonitorSetService(TMonitor monitor, IServiceValidator serviceValidator) : base(serviceValidator)
+    protected MonitorSetService(TMonitor monitor, IServiceValidator serviceValidator) : base(monitor, serviceValidator)
     {
-      _monitor = monitor;
     }
 
     #region HService Implementation
     protected override Result OnInitialize()
     {
-      Result init;
-      if (!(init = Monitor.Initialize()))
-        return init;
+      var init = Result.Success;
+      try
+      {
+        init += Monitor.Initialize();
 
-      Monitor.ItemChanged += OnItemChange;
-      Monitor.ItemsAdded += OnItemsAdded;
-      Monitor.ItemsRemoved += OnItemsRemoved;
+        Monitor.ItemChanged += OnItemChange;
+        Monitor.ItemsAdded += OnItemsAdded;
+        Monitor.ItemsRemoved += OnItemsRemoved;
+      }
+      catch (Exception e)
+      {
+        init += Result.Error(e);
+      }
+      
       return init;
     }
+    #endregion
 
-    protected override Result OnStart()
+    #region IMonitorSetService Implementation
+    public Result GetCurrentSet(out Collection<TItem> monitoredItems)
     {
-      return Monitor.Start();
-    }
-
-    protected override Result OnStop()
-    {
-      return Monitor.Stop();
-    }
-
-    protected override Result OnPause()
-    {
-      return Monitor.Pause();
-    }
-    
-    public override string ServiceName
-    {
-      get { return Monitor.ServiceName; }
+      return Monitor.GetCurrentSet(out monitoredItems);
     }
     #endregion
 

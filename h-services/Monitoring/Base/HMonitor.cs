@@ -2,7 +2,9 @@
 using System.Threading;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Configuration;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Interfaces.Configuration;
+using Hylasoft.Services.Interfaces.Monitoring;
+using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Resources;
 using Hylasoft.Services.Services.Base;
 using Hylasoft.Services.Types;
@@ -73,11 +75,21 @@ namespace Hylasoft.Services.Monitoring.Base
     }
 
     #region IService Implementation
-    public event EventHandler<Result> ErrorOccured;
-
     protected void RaiseError(Result error)
     {
       if (!error) TriggerErrorOccured(error);
+    }
+
+    protected Result ExecServiceLoop()
+    {
+      try
+      {
+        return PerformServiceLoop();
+      }
+      catch (Exception e)
+      {
+        return Result.Error(e);
+      }
     }
     #endregion
 
@@ -95,16 +107,12 @@ namespace Hylasoft.Services.Monitoring.Base
       if (Status != ServiceStatuses.Starting)
         return;
 
-      Result loop;
-      // Run loop once, to verify it can.
-      if (!(loop = PerformServiceLoop()))
-        ErrorOut(loop);
-
+      var loop = Result.Success;
       SetRunning(LastTransitionReason);
       while (IsRunning || IsPaused)
       {
         // TODO: Consider a re-try mechanism.
-        if (IsRunning && !(loop = PerformServiceLoop()))
+        if (ShouldPerformServiceLoop() && !(loop = ExecServiceLoop()))
           ErrorOut(loop);
 
         Thread.Sleep(Config.MonitorSleepInMilliseconds);
@@ -115,11 +123,11 @@ namespace Hylasoft.Services.Monitoring.Base
     }
     #endregion
 
-    #region Helper Methods
-    private void TriggerErrorOccured(Result error)
+    #region Protected Virtual Methods
+
+    protected virtual bool ShouldPerformServiceLoop()
     {
-      if (ErrorOccured != null)
-        ErrorOccured(this, error);
+      return IsRunning;
     }
     #endregion
   }

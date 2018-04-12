@@ -1,6 +1,7 @@
 ﻿using System;
 using Hylasoft.Resolution;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Interfaces.Services.Base;
+using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Resources;
 
 namespace Hylasoft.Services.Services.Base
@@ -10,9 +11,7 @@ namespace Hylasoft.Services.Services.Base
     protected HService(IServiceValidator serviceValidator = null) : base(serviceValidator)
     {
     }
-
-    public event EventHandler<Result> ErrorOccured;
-
+    
     protected override Result InitializeService()
     {
       return TransitionService(OnInitialize, Messages.ServiceInitialized, Errors.ServiceInitializationFailed);
@@ -57,11 +56,6 @@ namespace Hylasoft.Services.Services.Base
     protected abstract Result OnStop();
 
     protected abstract Result OnPause();
-    
-    protected void TriggerErrorOccured(Result error)
-    {
-      if (ErrorOccured != null && !error) ErrorOccured(this, error);
-    }
 
     public override string ToString()
     {

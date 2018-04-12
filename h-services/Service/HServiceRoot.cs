@@ -1,5 +1,6 @@
 ﻿using System.ServiceProcess;
-using Hylasoft.Services.Interfaces;
+using Hylasoft.Services.Interfaces.Providers;
+using Hylasoft.Services.Interfaces.Services;
 
 namespace Hylasoft.Services.Service
 {

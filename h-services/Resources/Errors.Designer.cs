@@ -79,6 +79,24 @@ namespace Hylasoft.Services.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not find Address &apos;{0}&apos; in Server &apos;{1}&apos;..
+        /// </summary>
+        internal static string NetworkSocketAddressNotFound {
+            get {
+                return ResourceManager.GetString("NetworkSocketAddressNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No handler was defined for this endpoint..
+        /// </summary>
+        internal static string NoHandlerDefinedForSocketMonitor {
+            get {
+                return ResourceManager.GetString("NoHandlerDefinedForSocketMonitor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Provided schedule was null..
         /// </summary>
         internal static string ScheduleNullError {

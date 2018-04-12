@@ -54,6 +54,7 @@
       <HintPath>..\packages\OmniColour.0.0.2\lib\net45\OmniColour.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -68,15 +69,26 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Base\NetworkMonitorTestBase.cs" />
     <Compile Include="MonitorSetServiceTests.cs" />
     <Compile Include="MonitorSetTests.cs" />
+    <Compile Include="NetworkServiceTests.cs" />
+    <Compile Include="NetworkSocketMonitorTests.cs" />
     <Compile Include="RootServiceTests.cs" />
-    <Compile Include="TestBase.cs" />
+    <Compile Include="Base\SetMonitorTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Base\TestBase.cs" />
     <Compile Include="Types\Loggers\NullLogger.cs" />
     <Compile Include="Types\MonitorSets\FailedSetMonitor.cs" />
     <Compile Include="Types\MonitorSets\TestMonitorItem.cs" />
     <Compile Include="Types\MonitorSets\TestSetMonitor.cs" />
+    <Compile Include="Types\NetworkMonitors\RequestTypes.cs" />
+    <Compile Include="Types\NetworkMonitors\ResponseTypes.cs" />
+    <Compile Include="Types\NetworkMonitors\TestNetworkClient.cs" />
+    <Compile Include="Types\NetworkMonitors\TestNetworkMonitor.cs" />
+    <Compile Include="Types\NetworkMonitors\TestRequest.cs" />
+    <Compile Include="Types\NetworkMonitors\TestResponse.cs" />
+    <Compile Include="Types\Services\TestNetworkSocketService.cs" />
     <Compile Include="Types\Services\TestSetMonitorService.cs" />
   </ItemGroup>
   <ItemGroup>

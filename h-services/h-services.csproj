@@ -57,16 +57,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Clients\SocketMonitorClient.cs" />
     <Compile Include="Configuration\DefaultMonitoringConfig.cs" />
-    <Compile Include="Interfaces\IHServiceRootRunner.cs" />
-    <Compile Include="Interfaces\IMonitor.cs" />
-    <Compile Include="Interfaces\IMonitoringConfig.cs" />
-    <Compile Include="Interfaces\IHService.cs" />
-    <Compile Include="Interfaces\IHServicesProvider.cs" />
-    <Compile Include="Interfaces\IServiceStatusElement.cs" />
-    <Compile Include="Interfaces\IServiceValidator.cs" />
-    <Compile Include="Interfaces\ISetMonitor.cs" />
+    <Compile Include="Configuration\DefaultNetworkSocketingConfig.cs" />
+    <Compile Include="Constants\ServiceNames.cs" />
+    <Compile Include="Constants\ServiceReasons.cs" />
+    <Compile Include="Constants\ServiceValues.cs" />
+    <Compile Include="Interfaces\Clients\ISocketMonitorClient.cs" />
+    <Compile Include="Interfaces\Configuration\INetworkSocketConfig.cs" />
+    <Compile Include="Interfaces\Monitoring\IKeepAliveMonitor.cs" />
+    <Compile Include="Interfaces\Monitoring\INetworkSocketMonitor.cs" />
+    <Compile Include="Interfaces\Services\Base\IInteractiveService.cs" />
+    <Compile Include="Interfaces\Services\IHServiceRootRunner.cs" />
+    <Compile Include="Interfaces\Monitoring\IMonitor.cs" />
+    <Compile Include="Interfaces\Configuration\IMonitoringConfig.cs" />
+    <Compile Include="Interfaces\Services\Base\IHService.cs" />
+    <Compile Include="Interfaces\Providers\IHServicesProvider.cs" />
+    <Compile Include="Interfaces\Services\IKeepAliveService.cs" />
+    <Compile Include="Interfaces\Services\IMonitorSetService.cs" />
+    <Compile Include="Interfaces\Services\Base\IServiceStatusElement.cs" />
+    <Compile Include="Interfaces\Services\INetworkSocketService.cs" />
+    <Compile Include="Interfaces\Utilities\INetworkParser.cs" />
+    <Compile Include="Interfaces\Utilities\ISocketPayloadSerializer.cs" />
+    <Compile Include="Interfaces\Validation\IServiceValidator.cs" />
+    <Compile Include="Interfaces\Monitoring\ISetMonitor.cs" />
+    <Compile Include="Monitoring\Base\InteractiveMonitor.cs" />
+    <Compile Include="Monitoring\KeepAliveMonitor.cs" />
+    <Compile Include="Monitoring\NetworkSocketMonitor.cs" />
     <Compile Include="Monitoring\SetMonitor.cs" />
+    <Compile Include="Monitoring\Types\NetworkSocketHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\HServiceProvider.cs" />
     <Compile Include="Resources\Debugs.Designer.cs">
@@ -79,6 +98,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Errors.resx</DependentUpon>
     </Compile>
+    <Compile Include="Resources\Fatals.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Fatals.resx</DependentUpon>
+    </Compile>
     <Compile Include="Resources\Messages.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -89,17 +113,30 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Warnings.resx</DependentUpon>
     </Compile>
+    <Compile Include="Services\Base\HMonitorService.cs" />
     <Compile Include="Services\Base\HService.cs" />
+    <Compile Include="Services\KeepAliveService.cs" />
     <Compile Include="Services\MonitorSetService.cs" />
+    <Compile Include="Services\NetworkSocketService.cs" />
     <Compile Include="Service\HServiceRoot.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Monitoring\Base\HMonitor.cs" />
     <Compile Include="Services\Base\HServiceStatusBase.cs" />
     <Compile Include="Service\HServiceRootRunner.cs" />
+    <Compile Include="Types\NetworkResult.cs" />
+    <Compile Include="Types\NetworkResultIssue.cs" />
     <Compile Include="Types\ServiceStatuses.cs" />
+    <Compile Include="Types\ServiceStatusInformation.cs" />
     <Compile Include="Types\ServiceStatusTransition.cs" />
+    <Compile Include="Types\SocketPayload.cs" />
+    <Compile Include="Types\SocketPayloadBase.cs" />
+    <Compile Include="Types\SocketRequest.cs" />
+    <Compile Include="Types\SocketResponse.cs" />
+    <Compile Include="Types\SocketResponsePackage.cs" />
     <Compile Include="Utilities\ItemSetComparer.cs" />
+    <Compile Include="Utilities\NetworkParser.cs" />
+    <Compile Include="Utilities\SocketPayloadSerializer.cs" />
     <Compile Include="Validation\ServiceValidator.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +150,10 @@
     <EmbeddedResource Include="Resources\Errors.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Errors.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Fatals.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Fatals.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Messages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
