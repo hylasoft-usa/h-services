@@ -123,6 +123,9 @@
   <data name="SetByParentService" xml:space="preserve">
     <value>Parent service requested transition.</value>
   </data>
+  <data name="StartedByKeepAliveMonitor" xml:space="preserve">
+    <value>Restarted by Keep Alive Monitor after {0} attempt(s).</value>
+  </data>
   <data name="UserRequestedTransition" xml:space="preserve">
     <value>User requested transition.</value>
   </data>

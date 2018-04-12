@@ -1,5 +1,6 @@
 ﻿using System;
 using Hylasoft.Resolution;
+using Hylasoft.Services.Constants;
 using Hylasoft.Services.Interfaces.Services.Base;
 using Hylasoft.Services.Interfaces.Validation;
 using Hylasoft.Services.Resources;
@@ -28,7 +29,7 @@ namespace Hylasoft.Services.Services.Base
     {
       _status = ServiceStatuses.Stopped;
       _serviceValidator = serviceValidator ?? new ServiceValidator();
-      _userRequestedTransition = Result.SingleDebug(Debugs.UserRequestedTransition);
+      _userRequestedTransition = Result.SingleDebug(ServiceReasons.UserRequestedTransition, Debugs.UserRequestedTransition);
       IsInitialized = false;
       LastTransitionReason = UserRequestedTransition;
     }
@@ -345,7 +346,8 @@ namespace Hylasoft.Services.Services.Base
           ? ServiceStatuses.Stopped
           : ServiceStatuses.Failed;
 
-        error += TransitionStatus(status, error);
+        if (Status != status)
+          error += TransitionStatus(status, error);
       }
       catch (Exception transitionFailed)
       {

@@ -18,7 +18,7 @@ namespace Hylasoft.Services.Monitoring
   {
     private readonly IDictionary<string, ServiceStatusInformation> _serviceStatuses;
 
-    protected IDictionary<string, ServiceStatusInformation> ServiceStatuses { get { return _serviceStatuses; } } 
+    protected IDictionary<string, ServiceStatusInformation> ServiceStatuses { get { return _serviceStatuses; } }
 
     public KeepAliveMonitor()
     {
@@ -185,14 +185,16 @@ namespace Hylasoft.Services.Monitoring
       if (!(revive += TriggerRevivingService(service)))
         return revive;
 
-      if (!(Result)(serviceInfo.LastResult = service.Start()))
+      // Setting reason information about start.
+      var reason = Result.SingleInfo(ServiceReasons.KeepAliveStartup, Debugs.StartedByKeepAliveMonitor, serviceInfo.FailedAttempts + 1);
+      if (!(Result)(serviceInfo.LastResult = service.Start(reason)))
       {
         // Failed to revive.
         ++serviceInfo.FailedAttempts;
         serviceInfo.LastAttempt = DateTime.Now;
         return revive + TriggerReviveFailed(service);
       }
-      
+
       // Service revived.
       serviceInfo.CurrentStatus = service.Status;
       serviceInfo.PriorStatus = currentStatus;
@@ -243,7 +245,7 @@ namespace Hylasoft.Services.Monitoring
       var attempts = serviceInfo.FailedAttempts;
 
       var multiplier = Math.Pow(growthRate, attempts);
-      secondsToWait = TimeSpan.FromSeconds(baseSeconds*multiplier);
+      secondsToWait = TimeSpan.FromSeconds(baseSeconds * multiplier);
 
       return Result.Success;
     }

@@ -61,6 +61,7 @@
     <Compile Include="Configuration\DefaultMonitoringConfig.cs" />
     <Compile Include="Configuration\DefaultNetworkSocketingConfig.cs" />
     <Compile Include="Constants\ServiceNames.cs" />
+    <Compile Include="Constants\ServiceReasons.cs" />
     <Compile Include="Constants\ServiceValues.cs" />
     <Compile Include="Interfaces\Clients\ISocketMonitorClient.cs" />
     <Compile Include="Interfaces\Configuration\INetworkSocketConfig.cs" />

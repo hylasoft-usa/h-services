@@ -79,6 +79,15 @@ namespace Hylasoft.Services.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Restarted by Keep Alive Monitor after {0} attempt(s)..
+        /// </summary>
+        internal static string StartedByKeepAliveMonitor {
+            get {
+                return ResourceManager.GetString("StartedByKeepAliveMonitor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User requested transition..
         /// </summary>
         internal static string UserRequestedTransition {

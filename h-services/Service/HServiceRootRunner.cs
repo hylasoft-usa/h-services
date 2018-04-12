@@ -5,6 +5,7 @@ using System.Linq;
 using Hylasoft.Extensions;
 using Hylasoft.Logging;
 using Hylasoft.Resolution;
+using Hylasoft.Services.Constants;
 using Hylasoft.Services.Interfaces.Providers;
 using Hylasoft.Services.Interfaces.Services;
 using Hylasoft.Services.Interfaces.Services.Base;
@@ -39,8 +40,8 @@ namespace Hylasoft.Services.Service
       _provider = provider;
       _services = ServicesProvider.Services;
       _logger = ServicesProvider.Logger;
-      _initializedByStartup = Result.SingleInfo(Debugs.InitializedByStartup);
-      _setByParentService = Result.SingleInfo(Debugs.SetByParentService);
+      _initializedByStartup = Result.SingleInfo(ServiceReasons.InitializedByStartup, Debugs.InitializedByStartup);
+      _setByParentService = Result.SingleInfo(ServiceReasons.SetByParentService, Debugs.SetByParentService);
 
       IsInitialized = false;
     }
