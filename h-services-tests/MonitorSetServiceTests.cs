@@ -1,12 +1,13 @@
 ﻿using System.Linq;
 using Hylasoft.Services.Tests.Base;
 using Hylasoft.Services.Tests.Types.MonitorSets;
+using Hylasoft.Services.Tests.Types.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Hylasoft.Services.Tests
 {
   [TestClass]
-  class MonitorSetServiceTests : SetMonitorTestBase
+  public class MonitorSetServiceTests : SetMonitorTestBase
   {
     [TestMethod]
     public void TestSetMonitorServiceStartup()
@@ -46,7 +47,7 @@ namespace Hylasoft.Services.Tests
 
       AssertAddedValue(service, newKey, newInitValue);
       AssertChangedValue(service, newKey, newChangedValue);
-      
+
       Assert.IsTrue(service.Stop());
     }
 
@@ -70,6 +71,59 @@ namespace Hylasoft.Services.Tests
       AssertChangedValue(service, newKey, newChangedValue);
 
       Assert.IsTrue(service.Stop());
+    }
+
+    [TestMethod]
+    public void TestSetMonitorServiceFailedStartup()
+    {
+      FailedSetMonitor monitor;
+      TestSetMonitorService service;
+      BuildFailedTestSetMonitorService(out service, out monitor);
+      monitor.ShouldFail = true;
+
+
+      Assert.IsFalse(service.Start());
+      AssertIsFailed(service);
+      AssertIsFailed(monitor);
+    }
+
+    [TestMethod]
+    public void TestSetMonitorFailureInService()
+    {
+      FailedSetMonitor monitor;
+      TestSetMonitorService service;
+      BuildFailedTestSetMonitorService(out service, out monitor);
+      monitor.ShouldFail = false;
+
+      Assert.IsTrue(service.Start());
+
+      monitor.ShouldFail = true;
+      monitor.WaitOnUpdate();
+      
+      AssertIsFailed(monitor);
+      AssertIsFailed(service);
+      Assert.IsTrue(service.Stop());
+
+      monitor.ShouldFail = false;
+      Assert.IsTrue(service.Start());
+      monitor.WaitOnUpdate();
+
+      Assert.IsTrue(service.IsRunning);
+      Assert.IsTrue(service.Stop());
+
+      monitor.WaitOnUpdate();
+      Assert.IsFalse(monitor.IsRunning);
+      Assert.IsFalse(service.IsRunning);
+    }
+
+    protected void BuildFailedTestSetMonitorService(out TestSetMonitorService service, out FailedSetMonitor monitor)
+    {
+      service = BuildTestSetMonitorService<FailedSetMonitor>();
+      Assert.IsNotNull(service);
+      Assert.IsTrue(service.Initialize());
+
+      monitor = service.InternalMonitor as FailedSetMonitor;
+      Assert.IsNotNull(monitor);
     }
   }
 }

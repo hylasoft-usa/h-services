@@ -10,6 +10,7 @@ using Hylasoft.Services.Service;
 using Hylasoft.Services.Tests.Types.Loggers;
 using Hylasoft.Services.Tests.Types.MonitorSets;
 using Hylasoft.Services.Tests.Types.Services;
+using Hylasoft.Services.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Hylasoft.Services.Tests.Base
@@ -35,7 +36,10 @@ namespace Hylasoft.Services.Tests.Base
     protected TestSetMonitorService BuildTestSetMonitorService<TMonitor>()
       where TMonitor : TestSetMonitor, new()
     {
-      return new TestSetMonitorService(BuildTestMonitor<TMonitor>());
+      var service = new TestSetMonitorService(BuildTestMonitor<TMonitor>());
+      service.Initialize();
+
+      return service;
     }
     
     protected TMonitor BuildTestMonitor<TMonitor>()
@@ -78,6 +82,12 @@ namespace Hylasoft.Services.Tests.Base
       Assert.IsNotNull(item = service.ChangedItem);
       Assert.AreEqual(item.Key, key);
       Assert.AreEqual(item.Value, value);
+    }
+
+    protected virtual void AssertIsFailed(IServiceStatusElement monitor)
+    {
+      Assert.IsTrue(monitor.IsFailed);
+      Assert.AreEqual(monitor.Status, ServiceStatuses.Failed);
     }
 
     protected void AssertAddedValue(TestSetMonitorService service, int key, string value)

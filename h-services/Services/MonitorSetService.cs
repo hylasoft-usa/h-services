@@ -33,7 +33,7 @@ namespace Hylasoft.Services.Services
         init += Result.Error(e);
       }
       
-      return init;
+      return init + base.OnInitialize();
     }
     #endregion
 

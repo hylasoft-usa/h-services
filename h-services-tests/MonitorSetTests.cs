@@ -2,6 +2,7 @@
 using System.Linq;
 using Hylasoft.Resolution;
 using Hylasoft.Services.Interfaces.Monitoring;
+using Hylasoft.Services.Interfaces.Services.Base;
 using Hylasoft.Services.Tests.Base;
 using Hylasoft.Services.Tests.Types.MonitorSets;
 using Hylasoft.Services.Types;
@@ -283,6 +284,12 @@ namespace Hylasoft.Services.Tests
       Assert.AreEqual(added.Value, value);
     }
 
+    protected override void AssertIsFailed(IServiceStatusElement monitor)
+    {
+      base.AssertIsFailed(monitor);
+      Assert.IsFalse(LastTransition.Reason);
+    }
+
     protected void AssertValueRemove(TestSetMonitor monitor, int key)
     {
       var rc = RemovedCount;
@@ -299,13 +306,6 @@ namespace Hylasoft.Services.Tests
       Assert.AreEqual(LastRemoved.Count, 1);
       Assert.AreEqual(LastRemoved.FirstOrDefault().Key, key);
       Assert.AreEqual(RemovedCount, ++rc);
-    }
-
-    protected void AssertIsFailed(IMonitor monitor)
-    {
-      Assert.IsTrue(monitor.IsFailed);
-      Assert.AreEqual(monitor.Status, ServiceStatuses.Failed);
-      Assert.IsFalse(LastTransition.Reason);
     }
 
     protected TMonitor BuildMonitor<TMonitor>()

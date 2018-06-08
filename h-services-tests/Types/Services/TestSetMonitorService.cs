@@ -23,7 +23,12 @@ namespace Hylasoft.Services.Tests.Types.Services
 
     public Collection<TestMonitorItem> NewItems { get; private set; }
 
-    public Collection<TestMonitorItem> RemovedItems { get; private set; } 
+    public Collection<TestMonitorItem> RemovedItems { get; private set; }
+
+    public TestSetMonitor InternalMonitor
+    {
+      get { return Monitor; }
+    }
 
     public TestSetMonitorService(TestSetMonitor monitor, IServiceValidator serviceValidator = null) : base(monitor, serviceValidator)
     {
